@@ -7,21 +7,21 @@ import '@/styles/global.css';
   <!-- Header -->
   <header class="border-b border-gray-800/60 backdrop-blur-md bg-gray-950/80 sticky top-0 z-20">
     <div class="container-custom py-4 flex items-center justify-between">
-      <h1 id="siteTitle" class="text-lg font-semibold text-gray-100 tracking-tight"><span class="sm:hidden">FFD</span><span class="hidden sm:inline" id="siteTitleFull">경제적 자유 대시보드</span></h1>
+      <h1 id="siteTitle" class="text-lg font-semibold text-gray-100 tracking-tight"><span class="md:hidden">FFD</span><span class="hidden md:inline" id="siteTitleFull">경제적 자유 대시보드</span></h1>
       <div class="flex items-center gap-2">
         <!-- Share Button -->
         <button id="btnShare" class="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-800/60 text-gray-400 hover:text-gray-200 transition-colors" title="Share">
-          🔗 <span id="shareLabel" class="hidden sm:inline">공유</span>
+          🔗 <span id="shareLabelShort" class="inline md:hidden">공유</span><span id="shareLabelFull" class="hidden md:inline">대시보드 공유하기</span>
         </button>
         <!-- Language Toggle -->
         <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
-          <button id="btnKO" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">🇰🇷 <span class="hidden sm:inline" id="btnKOLabel">한국어</span></button>
-          <button id="btnEN" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">🇺🇸 <span class="hidden sm:inline" id="btnENLabel">English</span></button>
+          <button id="btnKO" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">🇰🇷 <span class="hidden md:inline" id="btnKOLabel">한국어</span></button>
+          <button id="btnEN" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">🇺🇸 <span class="hidden md:inline" id="btnENLabel">English</span></button>
         </div>
         <!-- Currency Toggle -->
         <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
-          <button id="btnKRW" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors"><span id="btnKRWLabel">₩<span class="hidden sm:inline"> 원</span></span></button>
-          <button id="btnUSD" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors"><span id="btnUSDLabel">$<span class="hidden sm:inline"> USD</span></span></button>
+          <button id="btnKRW" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors"><span id="btnKRWLabel">₩<span class="hidden md:inline"> 원</span></span></button>
+          <button id="btnUSD" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors"><span id="btnUSDLabel">$<span class="hidden md:inline"> USD</span></span></button>
         </div>
       </div>
     </div>
@@ -486,8 +486,8 @@ import '@/styles/global.css';
       document.querySelectorAll('.money-suffix').forEach((el) => { el.textContent = cfg().suffix(); });
 
       // Currency toggle button text
-      document.getElementById('btnKRWLabel')!.innerHTML = lang === 'ko' ? '₩<span class="hidden sm:inline"> 원</span>' : '₩<span class="hidden sm:inline"> KRW</span>';
-      document.getElementById('btnUSDLabel')!.innerHTML = '$<span class="hidden sm:inline"> USD</span>';
+      document.getElementById('btnKRWLabel')!.innerHTML = lang === 'ko' ? '₩<span class="hidden md:inline"> 원</span>' : '₩<span class="hidden md:inline"> KRW</span>';
+      document.getElementById('btnUSDLabel')!.innerHTML = '$<span class="hidden md:inline"> USD</span>';
 
       // Chart headers
 
@@ -504,7 +504,8 @@ import '@/styles/global.css';
       document.getElementById('footerInspired')!.innerHTML = (lang === 'ko' ? '영감을 준 사이트: ' : 'Inspired by ') + inspiredLink;
 
       // Share button label
-      document.getElementById('shareLabel')!.textContent = lang === 'ko' ? '공유' : 'Share';
+      document.getElementById('shareLabelShort')!.textContent = lang === 'ko' ? '공유' : 'Share';
+      document.getElementById('shareLabelFull')!.textContent = lang === 'ko' ? '대시보드 공유하기' : 'Share Your Dashboard';
 
       validateAndUpdate();
     }
@@ -949,10 +950,13 @@ import '@/styles/global.css';
       const url = window.location.origin + window.location.pathname + encodeHash();
       try {
         await navigator.clipboard.writeText(url);
-        const label = document.getElementById('shareLabel')!;
-        const orig = label.textContent;
-        label.textContent = lang === 'ko' ? '완료' : 'Copied';
-        setTimeout(() => { label.textContent = orig; }, 1500);
+        const labelShort = document.getElementById('shareLabelShort')!;
+        const labelFull = document.getElementById('shareLabelFull')!;
+        const origShort = labelShort.textContent;
+        const origFull = labelFull.textContent;
+        labelShort.textContent = lang === 'ko' ? '복사됨' : 'Copied';
+        labelFull.textContent = lang === 'ko' ? '대시보드 주소가 복사되었습니다!' : 'Dashboard URL copied!';
+        setTimeout(() => { labelShort.textContent = origShort; labelFull.textContent = origFull; }, 1500);
       } catch {
         prompt(lang === 'ko' ? 'URL을 복사하세요:' : 'Copy this URL:', url);
       }
