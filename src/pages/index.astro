@@ -5,23 +5,27 @@ import '@/styles/global.css';
 
 <BaseLayout title="경제적 자유 대시보드 | Financial Freedom Dashboard">
   <!-- Header -->
-  <header class="border-b border-gray-800/60 backdrop-blur-md bg-gray-950/80 sticky top-0 z-20">
+  <header class="border-b border-slate-300/60 dark:border-gray-800/60 backdrop-blur-md bg-slate-100/90 dark:bg-gray-900/90 sticky top-0 z-20">
     <div class="container-custom py-4 flex items-center justify-between">
-      <h1 id="siteTitle" class="text-lg font-semibold text-gray-100 tracking-tight"><span class="md:hidden">FFD</span><span class="hidden md:inline" id="siteTitleFull">경제적 자유 대시보드</span></h1>
+      <h1 id="siteTitle" class="text-base font-bold tracking-widest text-slate-800 dark:text-gray-100"><span id="siteTitleShort" class="md:hidden">경.자.대</span><span class="hidden md:inline" id="siteTitleFull">경제적 자유 대시보드</span></h1>
       <div class="flex items-center gap-2">
         <!-- Share Button -->
-        <button id="btnShare" class="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-800/60 text-gray-400 hover:text-gray-200 transition-colors" title="Share">
+        <button id="btnShare" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-200/80 dark:bg-gray-800/60 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors" title="Share">
           🔗 <span id="shareLabelShort" class="inline md:hidden">공유</span><span id="shareLabelFull" class="hidden md:inline">대시보드 공유하기</span>
         </button>
+        <!-- Theme Toggle -->
+        <button id="btnTheme" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-200/80 dark:bg-gray-800/60 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors" title="Toggle theme">
+          🌙
+        </button>
         <!-- Language Toggle -->
-        <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
-          <button id="btnKO" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">🇰🇷 <span class="hidden md:inline" id="btnKOLabel">한국어</span></button>
-          <button id="btnEN" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">🇺🇸 <span class="hidden md:inline" id="btnENLabel">English</span></button>
+        <div class="flex items-center gap-1 bg-slate-200/80 dark:bg-gray-800/60 rounded-lg p-0.5">
+          <button id="btnKO" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/15 text-primary-700 dark:bg-primary-500/20 dark:text-primary-400 transition-colors">🇰🇷 <span class="hidden md:inline" id="btnKOLabel">한국어</span></button>
+          <button id="btnEN" class="px-2.5 py-1 text-xs font-medium rounded-md text-slate-500 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 transition-colors">🇺🇸 <span class="hidden md:inline" id="btnENLabel">English</span></button>
         </div>
         <!-- Currency Toggle -->
-        <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
-          <button id="btnKRW" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors"><span id="btnKRWLabel">₩<span class="hidden md:inline"> 원</span></span></button>
-          <button id="btnUSD" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors"><span id="btnUSDLabel">$<span class="hidden md:inline"> USD</span></span></button>
+        <div class="flex items-center gap-1 bg-slate-200/80 dark:bg-gray-800/60 rounded-lg p-0.5">
+          <button id="btnKRW" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/15 text-primary-700 dark:bg-primary-500/20 dark:text-primary-400 transition-colors"><span id="btnKRWLabel">₩<span class="hidden md:inline"> 원</span></span></button>
+          <button id="btnUSD" class="px-2.5 py-1 text-xs font-medium rounded-md text-slate-500 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 transition-colors"><span id="btnUSDLabel">$<span class="hidden md:inline"> USD</span></span></button>
         </div>
       </div>
     </div>
@@ -121,24 +125,24 @@ import '@/styles/global.css';
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="card p-5 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-500/[0.07] dark:from-primary-500/5 to-transparent"></div>
         <div class="relative">
-          <p id="summaryNetWorthLabel" class="text-xs text-gray-500 uppercase tracking-wide font-medium">은퇴 시점 순자산</p>
-          <p id="summaryNetWorth" class="text-2xl font-bold text-primary-400 mt-1.5 tabular-nums">-</p>
+          <p id="summaryNetWorthLabel" class="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-wide font-medium">은퇴 시점 순자산</p>
+          <p id="summaryNetWorth" class="text-2xl font-bold text-primary-700 dark:text-primary-400 mt-1.5 tabular-nums">-</p>
         </div>
       </div>
       <div id="freedomCard" class="card p-5 relative overflow-hidden">
-        <div id="freedomCardBg" class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent"></div>
+        <div id="freedomCardBg" class="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.07] dark:from-emerald-500/5 to-transparent"></div>
         <div class="relative">
-          <p id="freedomCardLabel" class="text-xs text-gray-500 uppercase tracking-wide font-medium">경제적 자유 달성</p>
-          <p id="summaryFreedomAge" class="text-2xl font-bold text-emerald-400 mt-1.5 tabular-nums">-</p>
+          <p id="freedomCardLabel" class="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-wide font-medium">경제적 자유 달성</p>
+          <p id="summaryFreedomAge" class="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1.5 tabular-nums">-</p>
         </div>
       </div>
       <div class="card p-5 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-violet-500/[0.07] dark:from-violet-500/5 to-transparent"></div>
         <div class="relative">
-          <p id="summaryDeathAgeLabel" class="text-xs text-gray-500 uppercase tracking-wide font-medium">목표 수명 시점 순자산</p>
-          <p id="summaryNetWorthEnd" class="text-2xl font-bold text-violet-400 mt-1.5 tabular-nums">-</p>
+          <p id="summaryDeathAgeLabel" class="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-wide font-medium">목표 수명 시점 순자산</p>
+          <p id="summaryNetWorthEnd" class="text-2xl font-bold text-violet-700 dark:text-violet-400 mt-1.5 tabular-nums">-</p>
         </div>
       </div>
     </div>
@@ -150,7 +154,7 @@ import '@/styles/global.css';
           <canvas id="netWorthChart"></canvas>
         </div>
       </div>
-      <div class="border-t border-gray-800/40 my-2"></div>
+      <div class="border-t border-slate-300/40 dark:border-gray-800/40 my-2"></div>
       <div>
         <div class="relative w-full" style="height: 260px;">
           <canvas id="incomeExpenseChart"></canvas>
@@ -160,11 +164,11 @@ import '@/styles/global.css';
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-gray-800/60 mt-8">
-    <div class="container-custom py-6 text-center text-xs text-gray-500">
-      <p>MIT License &copy; 2026 <a href="https://github.com/kimjiwook0129" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">kimjiwook0129</a></p>
-      <p class="mt-1"><a href="https://github.com/kimjiwook0129/financial-freedom.github.io" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
-      <p class="mt-1" id="footerInspired">Inspired by <a href="https://mickeyhkim.github.io/c/" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">mickeyhkim.github.io/c</a></p>
+  <footer class="border-t border-slate-300/60 dark:border-gray-800/60 mt-8">
+    <div class="container-custom py-6 text-center text-xs text-slate-500 dark:text-gray-500">
+      <p>MIT License &copy; 2026 <a href="https://github.com/kimjiwook0129" class="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">kimjiwook0129</a></p>
+      <p class="mt-1"><a href="https://github.com/kimjiwook0129/financial-freedom.github.io" class="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
+      <p class="mt-1" id="footerInspired">Inspired by <a href="https://mickeyhkim.github.io/c/" class="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">mickeyhkim.github.io/c</a></p>
     </div>
   </footer>
 
@@ -193,8 +197,8 @@ import '@/styles/global.css';
         targetNw: (a: number) => `목표 수명 (${a}세) 시점 순자산`,
         ageFmt: (a: number) => `${a}세`,
         retireLine: (a: number) => `은퇴 (${a}세)`,
-        freedomLine: (a: number) => `경제적 자유 (${a}세)`,
-        brokeLine: (a: number) => `자산 소진 (${a}세)`,
+        freedomLine: (a: number) => `자유 (${a}세)`,
+        brokeLine: (a: number) => `소진 (${a}세)`,
         vEnter: '값을 입력하세요',
         vPosInt: '양의 정수를 입력하세요',
         vRange: (max: number) => `1~${max} 사이의 정수를 입력하세요`,
@@ -354,7 +358,7 @@ import '@/styles/global.css';
     Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
 
     // =========================================================================
-    // Vertical Line Plugin (with anti-overlap labels)
+    // Vertical Line Plugin (with anti-overlap & edge-clamped labels)
     // =========================================================================
     const verticalLinePlugin = {
       id: 'verticalLines',
@@ -366,53 +370,103 @@ import '@/styles/global.css';
         const yScale = chart.scales.y;
         const yTop = yScale.top;
         const yBottom = yScale.bottom;
+        const chartLeft = chart.chartArea.left;
+        const chartRight = chart.chartArea.right;
+
+        // Detect theme
+        const dark = document.documentElement.classList.contains('dark');
 
         // Collect drawable lines with pixel positions
-        const items: { x: number; label: string; color: string; dash: number[]; width: number }[] = [];
+        const items: { x: number; label: string; color: string; colorDark: string }[] = [];
         lines.forEach((line: any) => {
           const idx = chart.data.labels!.indexOf(line.value.toString());
           if (idx === -1) return;
           items.push({
             x: xScale.getPixelForValue(idx),
             label: line.label || '',
-            color: line.color || '#fff',
-            dash: line.dash || [6, 4],
-            width: line.width || 1.5,
+            color: line.colorLight || line.color || '#475569',
+            colorDark: line.color || '#fff',
           });
         });
 
         // Sort by x position for overlap detection
         items.sort((a, b) => a.x - b.x);
 
-        // Draw lines
+        // Draw lines — thin, subtle dashes
         items.forEach((d) => {
+          const c = dark ? d.colorDark : d.color;
           ctx.save();
           ctx.beginPath();
-          ctx.setLineDash(d.dash);
-          ctx.strokeStyle = d.color;
-          ctx.lineWidth = d.width;
+          ctx.setLineDash([4, 6]);
+          ctx.strokeStyle = c + '80'; // 50% opacity
+          ctx.lineWidth = 1;
           ctx.moveTo(d.x, yTop);
           ctx.lineTo(d.x, yBottom);
           ctx.stroke();
           ctx.restore();
         });
 
-        // Draw labels with overlap avoidance
+        // Draw badge-style labels with overlap avoidance & edge clamping
         ctx.save();
-        ctx.font = '11px Pretendard, sans-serif';
-        ctx.textAlign = 'center';
+        const fontSize = 10;
+        ctx.font = `500 ${fontSize}px Pretendard, sans-serif`;
+        const padH = 6;
+        const padV = 3;
+        const badgeH = fontSize + padV * 2;
         const MIN_GAP = 100;
         let prevX = -Infinity;
         let prevRow = 0;
         items.forEach((d) => {
           if (!d.label) return;
+
+          // Row assignment for anti-overlap
           let row = 0;
           if (d.x - prevX < MIN_GAP) {
             row = prevRow === 0 ? 1 : 0;
           }
-          const yPos = yTop - 8 - row * 16;
-          ctx.fillStyle = d.color;
-          ctx.fillText(d.label, d.x, yPos);
+          const yPos = yTop - 6 - row * (badgeH + 4);
+
+          // Measure text and clamp horizontally (avoid legend area at top-left)
+          const textW = ctx.measureText(d.label).width;
+          const totalW = textW + padH * 2;
+          const legendBox = chart.legend?.legendHitBoxes?.[0];
+          const legendRight = legendBox ? legendBox.left + legendBox.width + 12 : chartLeft;
+          const minLeft = Math.max(chartLeft, legendRight);
+          let labelX = d.x;
+          if (labelX - totalW / 2 < minLeft) labelX = minLeft + totalW / 2;
+          if (labelX + totalW / 2 > chartRight) labelX = chartRight - totalW / 2;
+
+          // Draw badge background
+          const c = dark ? d.colorDark : d.color;
+          const rx = labelX - totalW / 2;
+          const ry = yPos - badgeH;
+          const radius = 4;
+          ctx.fillStyle = c + (dark ? '1A' : '20'); // background opacity
+          ctx.beginPath();
+          ctx.roundRect(rx, ry, totalW, badgeH, radius);
+          ctx.fill();
+          ctx.strokeStyle = c + (dark ? '40' : '50'); // border opacity
+          ctx.lineWidth = 0.5;
+          ctx.setLineDash([]);
+          ctx.stroke();
+
+          // Draw text
+          ctx.fillStyle = c;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(d.label, labelX, ry + badgeH / 2);
+
+          // Draw connector line from badge to vertical line
+          if (Math.abs(labelX - d.x) > 2) {
+            ctx.beginPath();
+            ctx.strokeStyle = c + '40';
+            ctx.lineWidth = 0.5;
+            ctx.setLineDash([2, 2]);
+            ctx.moveTo(d.x, yTop);
+            ctx.lineTo(labelX, ry + badgeH);
+            ctx.stroke();
+          }
+
           prevX = d.x;
           prevRow = row;
         });
@@ -458,8 +512,8 @@ import '@/styles/global.css';
     // =========================================================================
     const btnKO = document.getElementById('btnKO')!;
     const btnEN = document.getElementById('btnEN')!;
-    const toggleActive = 'px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors';
-    const toggleInactive = 'px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors';
+    const toggleActive = 'px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/15 text-primary-700 dark:bg-primary-500/20 dark:text-primary-400 transition-colors';
+    const toggleInactive = 'px-2.5 py-1 text-xs font-medium rounded-md text-slate-500 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 transition-colors';
 
     function setLang(l: Lang) {
       lang = l;
@@ -469,6 +523,7 @@ import '@/styles/global.css';
       const tr = t();
       document.title = tr.title + (lang === 'ko' ? ' | Financial Freedom Dashboard' : ' | 경제적 자유 대시보드');
       document.getElementById('siteTitleFull')!.textContent = tr.title;
+      document.getElementById('siteTitleShort')!.textContent = lang === 'ko' ? '경.자.대' : 'FFD';
 
       // Input labels
       document.getElementById('labelCurrentAge')!.textContent = tr.currentAge;
@@ -774,6 +829,47 @@ import '@/styles/global.css';
     });
 
     // =========================================================================
+    // Theme Toggle
+    // =========================================================================
+    let isDark = true;
+    const btnTheme = document.getElementById('btnTheme')!;
+
+    function applyThemeToCharts() {
+      const textColor = isDark ? '#64748b' : '#94a3b8';
+      const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(100,116,139,0.1)';
+      const legendColor = isDark ? '#94a3b8' : '#475569';
+      const tooltipBg = isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(30, 41, 59, 0.9)';
+      const tooltipTitle = isDark ? '#e2e8f0' : '#f1f5f9';
+      const tooltipBody = isDark ? '#94a3b8' : '#cbd5e1';
+      const tooltipBorder = isDark ? 'rgba(56, 189, 248, 0.2)' : 'rgba(56, 189, 248, 0.3)';
+      const hoverBorder = isDark ? '#0f172a' : '#f1f5f9';
+
+      [netWorthChart, incomeExpenseChart].forEach((chart) => {
+        const opts = chart.options as any;
+        opts.plugins.tooltip.backgroundColor = tooltipBg;
+        opts.plugins.tooltip.titleColor = tooltipTitle;
+        opts.plugins.tooltip.bodyColor = tooltipBody;
+        opts.plugins.tooltip.borderColor = tooltipBorder;
+        opts.plugins.legend.labels.color = legendColor;
+        if (opts.scales.x.title) opts.scales.x.title.color = textColor;
+        if (opts.scales.x.ticks) opts.scales.x.ticks.color = textColor;
+        opts.scales.y.ticks.color = textColor;
+        opts.scales.y.grid.color = gridColor;
+        chart.data.datasets.forEach((ds: any) => {
+          ds.pointHoverBorderColor = hoverBorder;
+        });
+        chart.update();
+      });
+    }
+
+    btnTheme.addEventListener('click', () => {
+      isDark = !isDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      btnTheme.textContent = isDark ? '🌙' : '☀️';
+      applyThemeToCharts();
+    });
+
+    // =========================================================================
     // Calculation
     // =========================================================================
     function update() {
@@ -843,13 +939,13 @@ import '@/styles/global.css';
       const freedomAchieved = endNetWorth >= 0;
 
       const vLines: any[] = [
-        { value: retirementAge, label: tr.retireLine(retirementAge), color: '#facc15', dash: [6, 4], width: 1.5 },
+        { value: retirementAge, label: tr.retireLine(retirementAge), color: '#facc15', colorLight: '#a16207' },
       ];
       if (freedomAchieved && freedomAge !== null) {
-        vLines.push({ value: freedomAge, label: tr.freedomLine(freedomAge), color: '#34d399', dash: [6, 4], width: 1.5 });
+        vLines.push({ value: freedomAge, label: tr.freedomLine(freedomAge), color: '#34d399', colorLight: '#047857' });
       }
       if (!freedomAchieved && brokeAge !== null) {
-        vLines.push({ value: brokeAge, label: tr.brokeLine(brokeAge), color: '#f87171', dash: [6, 4], width: 1.5 });
+        vLines.push({ value: brokeAge, label: tr.brokeLine(brokeAge), color: '#f87171', colorLight: '#b91c1c' });
       }
 
       // Update charts

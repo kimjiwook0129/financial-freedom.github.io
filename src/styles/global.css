@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply antialiased text-gray-100 bg-gray-950;
+    @apply antialiased text-slate-800 bg-slate-200 dark:text-gray-100 dark:bg-gray-950;
   }
 }
 
@@ -18,18 +18,22 @@
   }
 
   .card {
-    @apply bg-gray-900/80 backdrop-blur-sm rounded-2xl border border-gray-800/60;
+    @apply bg-slate-50/90 backdrop-blur-sm rounded-2xl border border-slate-300/60 shadow-sm
+           dark:bg-gray-900/80 dark:border-gray-800/60 dark:shadow-none;
   }
 
   .input-field {
-    @apply w-full px-3 py-2.5 bg-gray-800/70 border border-gray-700/50 rounded-xl
-           text-gray-100 text-right text-sm
-           focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/50
-           placeholder-gray-500 transition-all duration-200;
+    @apply w-full px-3 py-2.5 bg-white/80 border border-slate-300 rounded-xl
+           text-slate-800 text-right text-sm
+           focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400
+           placeholder-slate-400 transition-all duration-200
+           dark:bg-gray-800/70 dark:border-gray-700/50 dark:text-gray-100 dark:placeholder-gray-500
+           dark:focus:ring-primary-500/40 dark:focus:border-primary-500/50;
   }
 
   .input-label {
-    @apply block text-xs font-medium text-gray-400 mb-1.5 tracking-wide uppercase;
+    @apply block text-xs font-medium text-slate-600 mb-1.5 tracking-wide uppercase
+           dark:text-gray-400;
   }
 
   .input-group {
@@ -37,6 +41,7 @@
   }
 
   .input-suffix {
-    @apply absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none;
+    @apply absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 pointer-events-none
+           dark:text-gray-500;
   }
 }
