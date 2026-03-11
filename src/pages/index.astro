@@ -668,15 +668,20 @@ import '@/styles/global.css';
       }
       applyError(fields.targetAge, errors.targetAge, taResult);
 
-      moneyFieldKeys.forEach((key) => {
+      const moneyResults = moneyFieldKeys.map((key) => {
         const r = vMoney(fields[key].value);
         applyError(fields[key], errors[key], r);
+        return r;
       });
 
-      percentFieldKeys.forEach((key) => {
+      const percentResults = percentFieldKeys.map((key) => {
         const r = vPercent(fields[key].value);
         applyError(fields[key], errors[key], r);
+        return r;
       });
+
+      const allValid = [caResult, raResult, taResult, ...moneyResults, ...percentResults].every(r => r.valid);
+      if (!allValid) return;
 
       update();
     }
