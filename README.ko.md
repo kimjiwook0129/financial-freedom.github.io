@@ -37,6 +37,10 @@ npm run build
 npm run preview
 ```
 
+## 감사의 말
+
+[mickeyhkim.github.io/c](https://mickeyhkim.github.io/c/)에서 영감을 받았습니다.
+
 ## 라이선스
 
 [MIT](LICENSE) © 2026 [kimjiwook0129](https://github.com/kimjiwook0129)

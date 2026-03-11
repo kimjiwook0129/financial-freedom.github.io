@@ -37,6 +37,10 @@ npm run build
 npm run preview
 ```
 
+## Acknowledgements
+
+Inspired by [mickeyhkim.github.io/c](https://mickeyhkim.github.io/c/)
+
 ## License
 
 [MIT](LICENSE) © 2026 [kimjiwook0129](https://github.com/kimjiwook0129)
