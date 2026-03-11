@@ -7,17 +7,21 @@ import '@/styles/global.css';
   <!-- Header -->
   <header class="border-b border-gray-800/60 backdrop-blur-md bg-gray-950/80 sticky top-0 z-20">
     <div class="container-custom py-4 flex items-center justify-between">
-      <h1 id="siteTitle" class="text-lg font-semibold text-gray-100 tracking-tight">경제적 자유 대시보드</h1>
+      <h1 id="siteTitle" class="text-lg font-semibold text-gray-100 tracking-tight"><span class="sm:hidden">FFD</span><span class="hidden sm:inline" id="siteTitleFull">경제적 자유 대시보드</span></h1>
       <div class="flex items-center gap-2">
+        <!-- Share Button -->
+        <button id="btnShare" class="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-800/60 text-gray-400 hover:text-gray-200 transition-colors" title="Share">
+          🔗 <span id="shareLabel" class="hidden sm:inline">공유</span>
+        </button>
         <!-- Language Toggle -->
         <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
-          <button id="btnKO" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">🇰🇷 한국어</button>
-          <button id="btnEN" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">🇺🇸 English</button>
+          <button id="btnKO" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">🇰🇷 <span class="hidden sm:inline" id="btnKOLabel">한국어</span></button>
+          <button id="btnEN" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">🇺🇸 <span class="hidden sm:inline" id="btnENLabel">English</span></button>
         </div>
         <!-- Currency Toggle -->
         <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
-          <button id="btnKRW" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">₩ 원</button>
-          <button id="btnUSD" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">$ USD</button>
+          <button id="btnKRW" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors"><span id="btnKRWLabel">₩<span class="hidden sm:inline"> 원</span></span></button>
+          <button id="btnUSD" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors"><span id="btnUSDLabel">$<span class="hidden sm:inline"> USD</span></span></button>
         </div>
       </div>
     </div>
@@ -464,7 +468,7 @@ import '@/styles/global.css';
 
       const tr = t();
       document.title = tr.title + (lang === 'ko' ? ' | Financial Freedom Dashboard' : ' | 경제적 자유 대시보드');
-      document.getElementById('siteTitle')!.textContent = tr.title;
+      document.getElementById('siteTitleFull')!.textContent = tr.title;
 
       // Input labels
       document.getElementById('labelCurrentAge')!.textContent = tr.currentAge;
@@ -482,8 +486,8 @@ import '@/styles/global.css';
       document.querySelectorAll('.money-suffix').forEach((el) => { el.textContent = cfg().suffix(); });
 
       // Currency toggle button text
-      btnKRW.textContent = lang === 'ko' ? '₩ 원' : '₩ KRW';
-      btnUSD.textContent = '$ USD';
+      document.getElementById('btnKRWLabel')!.innerHTML = lang === 'ko' ? '₩<span class="hidden sm:inline"> 원</span>' : '₩<span class="hidden sm:inline"> KRW</span>';
+      document.getElementById('btnUSDLabel')!.innerHTML = '$<span class="hidden sm:inline"> USD</span>';
 
       // Chart headers
 
@@ -499,6 +503,9 @@ import '@/styles/global.css';
       const inspiredLink = '<a href="https://mickeyhkim.github.io/c/" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">mickeyhkim.github.io/c</a>';
       document.getElementById('footerInspired')!.innerHTML = (lang === 'ko' ? '영감을 준 사이트: ' : 'Inspired by ') + inspiredLink;
 
+      // Share button label
+      document.getElementById('shareLabel')!.textContent = lang === 'ko' ? '공유' : 'Share';
+
       validateAndUpdate();
     }
 
@@ -512,16 +519,25 @@ import '@/styles/global.css';
     const btnUSD = document.getElementById('btnUSD')!;
 
     function setCurrency(c: Currency) {
+      const prevCurrency = currency;
       currency = c;
       btnKRW.className = c === 'KRW' ? toggleActive : toggleInactive;
       btnUSD.className = c === 'USD' ? toggleActive : toggleInactive;
 
       document.querySelectorAll('.money-suffix').forEach((el) => { el.textContent = cfg().suffix(); });
 
-      const defs = cfg().defaults;
       moneyFieldKeys.forEach((key) => {
+        const raw = CURRENCY[prevCurrency].parseMoney(fields[key].value);
+        let converted: number;
+        if (prevCurrency === 'KRW' && c === 'USD') {
+          converted = Math.round(raw / 1000 * 100) / 100; // KRW -> USD: divide by 1000, keep 2 decimals
+        } else if (prevCurrency === 'USD' && c === 'KRW') {
+          converted = Math.round(raw * 1000); // USD -> KRW: multiply by 1000, integer
+        } else {
+          converted = raw;
+        }
         fields[key].setAttribute('inputmode', cfg().inputMode);
-        fields[key].value = defs[key as keyof typeof defs];
+        fields[key].value = c === 'USD' ? converted.toFixed(2) : String(converted);
         formatMoneyInput(fields[key]);
       });
 
@@ -873,6 +889,77 @@ import '@/styles/global.css';
       document.getElementById('summaryDeathAgeLabel')!.textContent = tr.targetNw(targetAge);
       document.getElementById('summaryNetWorthEnd')!.textContent = formatMoneyFull(endNetWorth);
     }
+
+    // =========================================================================
+    // Share: encode/decode state via URL hash (compact base64)
+    // =========================================================================
+    // Format: version 1 = "1|lang|cur|ca|ra|ta|nw|cagr|ai|ig|ae|eg"
+    // Pipe-delimited, base64url-encoded. New fields append at end (backward compat).
+    const FIELD_ORDER: (keyof typeof fields)[] = [
+      'currentAge', 'retirementAge', 'targetAge',
+      'currentNetWorth', 'cagr',
+      'annualIncome', 'incomeIncrease',
+      'annualExpense', 'expenseIncrease',
+    ];
+
+    function toBase64Url(s: string): string {
+      return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function fromBase64Url(s: string): string {
+      let b = s.replace(/-/g, '+').replace(/_/g, '/');
+      while (b.length % 4) b += '=';
+      return atob(b);
+    }
+
+    function encodeHash(): string {
+      const parts = ['1', lang, currency];
+      for (const key of FIELD_ORDER) {
+        parts.push(fields[key].value.replace(/,/g, ''));
+      }
+      return '#' + toBase64Url(parts.join('|'));
+    }
+
+    function loadFromHash(): boolean {
+      const hash = window.location.hash.slice(1);
+      if (!hash) return false;
+      try {
+        const decoded = fromBase64Url(hash);
+        const parts = decoded.split('|');
+        if (parts[0] !== '1') return false; // unknown version
+        const hashLang = parts[1];
+        const hashCur = parts[2];
+        if (hashLang === 'ko' || hashLang === 'en') setLang(hashLang);
+        if (hashCur === 'KRW' || hashCur === 'USD') setCurrency(hashCur);
+        // Fields — only set if present in the hash (backward compat: new fields may not exist)
+        for (let i = 0; i < FIELD_ORDER.length; i++) {
+          const val = parts[3 + i];
+          if (val !== undefined && val !== '') {
+            const key = FIELD_ORDER[i];
+            fields[key].value = val;
+            if (moneyFieldKeys.includes(key as any)) formatMoneyInput(fields[key]);
+          }
+        }
+        validateAndUpdate();
+        return true;
+      } catch { return false; }
+    }
+
+    // Share button
+    document.getElementById('btnShare')!.addEventListener('click', async () => {
+      const url = window.location.origin + window.location.pathname + encodeHash();
+      try {
+        await navigator.clipboard.writeText(url);
+        const label = document.getElementById('shareLabel')!;
+        const orig = label.textContent;
+        label.textContent = lang === 'ko' ? '완료' : 'Copied';
+        setTimeout(() => { label.textContent = orig; }, 1500);
+      } catch {
+        prompt(lang === 'ko' ? 'URL을 복사하세요:' : 'Copy this URL:', url);
+      }
+    });
+
+    // Load from hash on page load
+    loadFromHash();
 
     // Initial render
     validateAndUpdate();
