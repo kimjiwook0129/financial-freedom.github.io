@@ -248,6 +248,39 @@ import '@/styles/global.css';
     type Currency = 'KRW' | 'USD';
     let currency: Currency = 'KRW';
 
+    function formatLargeKo(value: number): string {
+      const abs = Math.abs(value);
+      const sign = value < 0 ? '-' : '';
+      const units: [number, string][] = [
+        [1e68, '무량대수'], [1e64, '불가사의'], [1e60, '나유타'], [1e56, '아승기'], [1e52, '항하사'],
+        [1e48, '극'], [1e44, '재'], [1e40, '정'], [1e36, '간'], [1e32, '구'], [1e28, '양'],
+        [1e24, '자'], [1e20, '해'], [1e16, '경'], [1e12, '조'], [1e8, '억'], [1e4, '만'],
+      ];
+      for (const [threshold, unit] of units) {
+        if (abs >= threshold) return sign + (abs / threshold).toFixed(1) + ' ' + unit;
+      }
+      return value.toLocaleString('ko-KR');
+    }
+
+    function formatLargeEn(value: number, withDollar = true): string {
+      const abs = Math.abs(value);
+      const sign = value < 0 ? '-' : '';
+      const prefix = withDollar ? '$' : '';
+      const units: [number, string][] = [
+        [1e69, 'Duovigintillion'], [1e66, 'Unvigintillion'], [1e63, 'Vigintillion'],
+        [1e60, 'Novemdecillion'], [1e57, 'Octodecillion'], [1e54, 'Septendecillion'],
+        [1e51, 'Sexdecillion'], [1e48, 'Quindecillion'], [1e45, 'Quattuordecillion'],
+        [1e42, 'Tredecillion'], [1e39, 'Duodecillion'], [1e36, 'Undecillion'],
+        [1e33, 'Decillion'], [1e30, 'Nonillion'], [1e27, 'Octillion'], [1e24, 'Septillion'],
+        [1e21, 'Sextillion'], [1e18, 'Quintillion'], [1e15, 'Quadrillion'], [1e12, 'Trillion'],
+        [1e9, 'Billion'], [1e6, 'Million'],
+      ];
+      for (const [threshold, unit] of units) {
+        if (abs >= threshold) return sign + prefix + (abs / threshold).toFixed(1) + ' ' + unit;
+      }
+      return prefix + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     const CURRENCY = {
       KRW: {
         suffix() { return lang === 'ko' ? '원' : '₩'; },
@@ -264,7 +297,11 @@ import '@/styles/global.css';
           if (val > 999_999_999_999) return t().vKrwMax;
           return null;
         },
-        formatFull(value: number): string {
+        formatFull(value: number, cap = false): string {
+          if (cap && Math.abs(value) > 999_999_999_999) {
+            if (lang === 'ko') return formatLargeKo(value) + '원';
+            return '₩' + formatLargeEn(value, false);
+          }
           if (lang === 'ko') return value.toLocaleString('ko-KR') + '원';
           return '₩' + value.toLocaleString('ko-KR');
         },
@@ -284,7 +321,11 @@ import '@/styles/global.css';
           if (val > 999_999_999.99) return t().vUsdMax;
           return null;
         },
-        formatFull(value: number): string {
+        formatFull(value: number, cap = false): string {
+          if (cap && Math.abs(value) > 999_999_999_999) {
+            if (lang === 'ko') return '$' + formatLargeKo(value);
+            return formatLargeEn(value);
+          }
           return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         },
       },
@@ -295,21 +336,34 @@ import '@/styles/global.css';
       const abs = Math.abs(value);
       const sign = value < 0 ? '-' : '';
       if (lang === 'ko') {
-        if (abs >= 1_0000_0000_0000) return sign + (abs / 1_0000_0000_0000).toFixed(1) + '조';
-        if (abs >= 1_0000_0000) return sign + (abs / 1_0000_0000).toFixed(1) + '억';
-        if (abs >= 1_0000) return sign + (abs / 1_0000).toFixed(0) + '만';
+        // 만(10^4), 억(10^8), 조(10^12), 경(10^16), 해(10^20), 자(10^24), 양(10^28), 구(10^32), 간(10^36), 정(10^40), 재(10^44), 극(10^48), 항하사(10^52), 아승기(10^56), 나유타(10^60), 불가사의(10^64), 무량대수(10^68)
+        const koUnits: [number, string][] = [
+          [1e68, '무량대수'], [1e64, '불가사의'], [1e60, '나유타'], [1e56, '아승기'], [1e52, '항하사'],
+          [1e48, '극'], [1e44, '재'], [1e40, '정'], [1e36, '간'], [1e32, '구'], [1e28, '양'],
+          [1e24, '자'], [1e20, '해'], [1e16, '경'], [1e12, '조'], [1e8, '억'], [1e4, '만'],
+        ];
+        for (const [threshold, unit] of koUnits) {
+          if (abs >= threshold) return sign + (abs / threshold).toFixed(1) + unit;
+        }
         return value.toLocaleString('ko-KR');
       } else {
-        if (abs >= 1_000_000_000_000) return sign + (abs / 1_000_000_000_000).toFixed(1) + 'T';
-        if (abs >= 1_000_000_000) return sign + (abs / 1_000_000_000).toFixed(1) + 'B';
-        if (abs >= 1_000_000) return sign + (abs / 1_000_000).toFixed(1) + 'M';
-        if (abs >= 1_000) return sign + (abs / 1_000).toFixed(1) + 'K';
+        // K(10^3), M(10^6), B(10^9), T(10^12), Qd(10^15), Qn(10^18), Sx(10^21), Sp(10^24), Oc(10^27), No(10^30), Dc(10^33),
+        // UDc(10^36), DDc(10^39), TDc(10^42), QaDc(10^45), QiDc(10^48), SxDc(10^51), SpDc(10^54), OcDc(10^57), NoDc(10^60), Vg(10^63), UVg(10^66), DVg(10^69)
+        const enUnits: [number, string][] = [
+          [1e69, 'DVg'], [1e66, 'UVg'], [1e63, 'Vg'], [1e60, 'NoDc'], [1e57, 'OcDc'], [1e54, 'SpDc'],
+          [1e51, 'SxDc'], [1e48, 'QiDc'], [1e45, 'QaDc'], [1e42, 'TDc'], [1e39, 'DDc'], [1e36, 'UDc'],
+          [1e33, 'Dc'], [1e30, 'No'], [1e27, 'Oc'], [1e24, 'Sp'], [1e21, 'Sx'], [1e18, 'Qn'],
+          [1e15, 'Qd'], [1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K'],
+        ];
+        for (const [threshold, unit] of enUnits) {
+          if (abs >= threshold) return sign + (abs / threshold).toFixed(1) + unit;
+        }
         return sign + abs.toFixed(0);
       }
     }
 
     function cfg() { return CURRENCY[currency]; }
-    function formatMoneyFull(v: number) { return cfg().formatFull(v); }
+    function formatMoneyFull(v: number, cap = false) { return cfg().formatFull(v, cap); }
     function parseMoney(s: string) { return cfg().parseMoney(s); }
 
     // =========================================================================
@@ -586,7 +640,7 @@ import '@/styles/global.css';
         const raw = CURRENCY[prevCurrency].parseMoney(fields[key].value);
         let converted: number;
         if (prevCurrency === 'KRW' && c === 'USD') {
-          converted = Math.round(raw / 1000 * 100) / 100; // KRW -> USD: divide by 1000, keep 2 decimals
+          converted = Math.floor(raw / 1000 * 100) / 100; // KRW -> USD: divide by 1000, truncate to 2 decimals
         } else if (prevCurrency === 'USD' && c === 'KRW') {
           converted = Math.round(raw * 1000); // USD -> KRW: multiply by 1000, integer
         } else {
@@ -970,7 +1024,7 @@ import '@/styles/global.css';
       const retirementIdx = Math.min(Math.max(retirementAge - currentAge, 0), netWorths.length - 1);
       document.getElementById('summaryNetWorthLabel')!.textContent = tr.retireNw(retirementAge);
       document.getElementById('summaryNetWorth')!.textContent =
-        netWorths.length > 0 ? formatMoneyFull(netWorths[retirementIdx]) : '-';
+        netWorths.length > 0 ? formatMoneyFull(netWorths[retirementIdx], true) : '-';
 
       const freedomEl = document.getElementById('summaryFreedomAge')!;
       const freedomLabel = document.getElementById('freedomCardLabel')!;
@@ -989,7 +1043,7 @@ import '@/styles/global.css';
       }
 
       document.getElementById('summaryDeathAgeLabel')!.textContent = tr.targetNw(targetAge);
-      document.getElementById('summaryNetWorthEnd')!.textContent = formatMoneyFull(endNetWorth);
+      document.getElementById('summaryNetWorthEnd')!.textContent = formatMoneyFull(endNetWorth, true);
     }
 
     // =========================================================================
