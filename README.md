@@ -10,8 +10,10 @@ A single-page financial freedom dashboard that projects your net worth over time
 - Income/expense trend simulation with individual growth rates
 - Financial freedom age calculation (full forward simulation)
 - Interactive charts with annotated milestones (retirement, financial freedom, asset depletion)
-- KRW/USD currency toggle with per-currency validation and defaults
+- KRW/USD currency toggle with automatic value conversion (÷1000 / ×1000)
 - Korean/English language toggle
+- Shareable dashboard via compact URL encoding
+- Responsive design with condensed navbar on mobile/tablet
 - Comma-formatted money inputs with real-time validation
 
 ## Tech Stack
