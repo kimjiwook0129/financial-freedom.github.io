@@ -12,6 +12,7 @@ A single-page financial freedom dashboard that projects your net worth over time
 - Interactive charts with annotated milestones (retirement, financial freedom, asset depletion)
 - KRW/USD currency toggle with automatic value conversion (÷1000 / ×1000)
 - Korean/English language toggle
+- Dark/light theme toggle
 - Shareable dashboard via compact URL encoding
 - Responsive design with condensed navbar on mobile/tablet
 - Comma-formatted money inputs with real-time validation
