@@ -2,7 +2,7 @@
 
 [한국어](README.ko.md)
 
-A single-page financial freedom simulator that projects your net worth over time and estimates when you can achieve financial independence.
+A single-page financial freedom dashboard that projects your net worth over time and estimates when you can achieve financial independence.
 
 ## Features
 
