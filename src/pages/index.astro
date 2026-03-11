@@ -1,0 +1,874 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import '@/styles/global.css';
+---
+
+<BaseLayout title="경제적 자유 대시보드 | Financial Freedom Dashboard">
+  <!-- Header -->
+  <header class="border-b border-gray-800/60 backdrop-blur-md bg-gray-950/80 sticky top-0 z-20">
+    <div class="container-custom py-4 flex items-center justify-between">
+      <h1 id="siteTitle" class="text-lg font-semibold text-gray-100 tracking-tight">경제적 자유 대시보드</h1>
+      <div class="flex items-center gap-2">
+        <!-- Language Toggle -->
+        <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
+          <button id="btnKO" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">🇰🇷 한국어</button>
+          <button id="btnEN" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">🇺🇸 English</button>
+        </div>
+        <!-- Currency Toggle -->
+        <div class="flex items-center gap-1 bg-gray-800/60 rounded-lg p-0.5">
+          <button id="btnKRW" class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors">₩ 원</button>
+          <button id="btnUSD" class="px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors">$ USD</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-custom py-8 space-y-6">
+    <!-- Input Panel -->
+    <div class="card p-6 space-y-4">
+      <!-- Row 1: Ages, Net Worth, CAGR -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-5 gap-y-4">
+        <div class="input-group">
+          <label class="input-label" for="currentAge" id="labelCurrentAge">현재 나이</label>
+          <div class="relative">
+            <input type="text" id="currentAge" class="input-field pr-8" value="30" inputmode="numeric" />
+            <span class="input-suffix age-suffix">세</span>
+          </div>
+          <p id="currentAgeError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="retirementAge" id="labelRetirementAge">은퇴 나이</label>
+          <div class="relative">
+            <input type="text" id="retirementAge" class="input-field pr-8" value="60" inputmode="numeric" />
+            <span class="input-suffix age-suffix">세</span>
+          </div>
+          <p id="retirementAgeError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="targetAge" id="labelTargetAge">목표 수명</label>
+          <div class="relative">
+            <input type="text" id="targetAge" class="input-field pr-8" value="80" inputmode="numeric" />
+            <span class="input-suffix age-suffix">세</span>
+          </div>
+          <p id="targetAgeError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+
+        <div class="input-group lg:col-span-1">
+          <label class="input-label" for="currentNetWorth" id="labelNetWorth">현재 순자산</label>
+          <div class="relative">
+            <input type="text" id="currentNetWorth" class="input-field pr-8" value="100,000,000" inputmode="numeric" />
+            <span class="input-suffix money-suffix">원</span>
+          </div>
+          <p id="currentNetWorthError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="cagr" id="labelCagr">연평균 수익률</label>
+          <div class="relative">
+            <input type="text" id="cagr" class="input-field pr-8" value="7.00" inputmode="decimal" />
+            <span class="input-suffix">%</span>
+          </div>
+          <p id="cagrError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+      </div>
+
+      <!-- Row 2: Income & Expense -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-4">
+        <div class="input-group">
+          <label class="input-label" for="annualIncome" id="labelIncome">연간 수입 (세후)</label>
+          <div class="relative">
+            <input type="text" id="annualIncome" class="input-field pr-8" value="40,000,000" inputmode="numeric" />
+            <span class="input-suffix money-suffix">원</span>
+          </div>
+          <p id="annualIncomeError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="incomeIncrease" id="labelIncomeGrowth">수입 증가율</label>
+          <div class="relative">
+            <input type="text" id="incomeIncrease" class="input-field pr-8" value="4.00" inputmode="decimal" />
+            <span class="input-suffix">%</span>
+          </div>
+          <p id="incomeIncreaseError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="annualExpense" id="labelExpense">연간 지출</label>
+          <div class="relative">
+            <input type="text" id="annualExpense" class="input-field pr-8" value="30,000,000" inputmode="numeric" />
+            <span class="input-suffix money-suffix">원</span>
+          </div>
+          <p id="annualExpenseError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="expenseIncrease" id="labelExpenseGrowth">지출 증가율</label>
+          <div class="relative">
+            <input type="text" id="expenseIncrease" class="input-field pr-8" value="3.00" inputmode="decimal" />
+            <span class="input-suffix">%</span>
+          </div>
+          <p id="expenseIncreaseError" class="text-[10px] text-red-400 mt-0.5 hidden"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="card p-5 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent"></div>
+        <div class="relative">
+          <p id="summaryNetWorthLabel" class="text-xs text-gray-500 uppercase tracking-wide font-medium">은퇴 시점 순자산</p>
+          <p id="summaryNetWorth" class="text-2xl font-bold text-primary-400 mt-1.5 tabular-nums">-</p>
+        </div>
+      </div>
+      <div id="freedomCard" class="card p-5 relative overflow-hidden">
+        <div id="freedomCardBg" class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent"></div>
+        <div class="relative">
+          <p id="freedomCardLabel" class="text-xs text-gray-500 uppercase tracking-wide font-medium">경제적 자유 달성</p>
+          <p id="summaryFreedomAge" class="text-2xl font-bold text-emerald-400 mt-1.5 tabular-nums">-</p>
+        </div>
+      </div>
+      <div class="card p-5 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent"></div>
+        <div class="relative">
+          <p id="summaryDeathAgeLabel" class="text-xs text-gray-500 uppercase tracking-wide font-medium">목표 수명 시점 순자산</p>
+          <p id="summaryNetWorthEnd" class="text-2xl font-bold text-violet-400 mt-1.5 tabular-nums">-</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="card p-6 space-y-0">
+      <div>
+        <div class="relative w-full" style="height: 320px;">
+          <canvas id="netWorthChart"></canvas>
+        </div>
+      </div>
+      <div class="border-t border-gray-800/40 my-2"></div>
+      <div>
+        <div class="relative w-full" style="height: 260px;">
+          <canvas id="incomeExpenseChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-800/60 mt-8">
+    <div class="container-custom py-6 text-center text-xs text-gray-500">
+      <p>MIT License &copy; 2026 <a href="https://github.com/kimjiwook0129" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">kimjiwook0129</a></p>
+      <p class="mt-1"><a href="https://github.com/kimjiwook0129/financial-freedom.github.io" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
+    </div>
+  </footer>
+
+  <script>
+    import Chart from 'chart.js/auto';
+
+    // =========================================================================
+    // i18n
+    // =========================================================================
+    type Lang = 'ko' | 'en';
+    let lang: Lang = 'ko';
+
+    const T = {
+      ko: {
+        title: '경제적 자유 대시보드',
+        currentAge: '현재 나이', retirementAge: '은퇴 나이', targetAge: '목표 수명',
+        netWorthLabel: '현재 순자산', cagr: '연평균 수익률',
+        income: '연간 수입 (세후)', incomeGrowth: '수입 증가율',
+        expense: '연간 지출', expenseGrowth: '지출 증가율',
+        ageSuffix: '세',
+        dsNetWorth: '순자산', dsIncome: '연간 수입 (세후)', dsExpense: '연간 지출',
+        xAxis: '나이 (세)',
+        retireNw: (a: number) => `은퇴 시점 (${a}세) 순자산`,
+        freedomOk: '경제적 자유 달성',
+        depleted: '자산 소진 나이',
+        targetNw: (a: number) => `목표 수명 (${a}세) 시점 순자산`,
+        ageFmt: (a: number) => `${a}세`,
+        retireLine: (a: number) => `은퇴 (${a}세)`,
+        freedomLine: (a: number) => `경제적 자유 (${a}세)`,
+        brokeLine: (a: number) => `자산 소진 (${a}세)`,
+        vEnter: '값을 입력하세요',
+        vPosInt: '양의 정수를 입력하세요',
+        vRange: (max: number) => `1~${max} 사이의 정수를 입력하세요`,
+        vGtCurrent: '현재 나이보다 커야 합니다',
+        vGtRetire: '은퇴 나이보다 커야 합니다',
+        vPercent: '0.00~100.00 사이의 값을 입력하세요',
+        vKrwInt: '양의 정수를 입력하세요',
+        vKrwMax: '최대 999,999,999,999까지 입력 가능합니다',
+        vUsdDec: '소수점 2자리까지의 양수를 입력하세요',
+        vUsdMax: '최대 999,999,999.99까지 입력 가능합니다',
+      },
+      en: {
+        title: 'Financial Freedom Dashboard',
+        currentAge: 'Current Age', retirementAge: 'Retirement Age', targetAge: 'Life Expectancy',
+        netWorthLabel: 'Net Worth', cagr: 'Annual Return',
+        income: 'Annual Income (After Tax)', incomeGrowth: 'Income Growth',
+        expense: 'Annual Expense', expenseGrowth: 'Expense Growth',
+        ageSuffix: 'yrs',
+        dsNetWorth: 'Net Worth', dsIncome: 'Income (After Tax)', dsExpense: 'Expense',
+        xAxis: 'Age',
+        retireNw: (a: number) => `Net Worth at Retirement (Age ${a})`,
+        freedomOk: 'Financial Freedom',
+        depleted: 'Asset Depletion Age',
+        targetNw: (a: number) => `Net Worth at Age ${a}`,
+        ageFmt: (a: number) => `Age ${a}`,
+        retireLine: (a: number) => `Retirement (${a})`,
+        freedomLine: (a: number) => `Freedom (${a})`,
+        brokeLine: (a: number) => `Depleted (${a})`,
+        vEnter: 'Enter a value',
+        vPosInt: 'Enter a positive integer',
+        vRange: (max: number) => `Enter an integer between 1 and ${max}`,
+        vGtCurrent: 'Must be greater than current age',
+        vGtRetire: 'Must be greater than retirement age',
+        vPercent: 'Enter a value between 0.00 and 100.00',
+        vKrwInt: 'Enter a positive integer',
+        vKrwMax: 'Max 999,999,999,999',
+        vUsdDec: 'Positive number, up to 2 decimal places',
+        vUsdMax: 'Max 999,999,999.99',
+      },
+    };
+
+    function t() { return T[lang]; }
+
+    // =========================================================================
+    // Currency Configuration
+    // =========================================================================
+    type Currency = 'KRW' | 'USD';
+    let currency: Currency = 'KRW';
+
+    const CURRENCY = {
+      KRW: {
+        suffix() { return lang === 'ko' ? '원' : '₩'; },
+        defaults: { currentNetWorth: '100000000', annualIncome: '40000000', annualExpense: '30000000' },
+        inputMode: 'numeric' as const,
+        parseMoney(str: string): number {
+          return parseInt(str.replace(/,/g, ''), 10) || 0;
+        },
+        validateMoney(str: string): string | null {
+          const cleaned = str.replace(/,/g, '');
+          if (cleaned === '') return null;
+          if (!/^\d+$/.test(cleaned)) return t().vKrwInt;
+          const val = parseInt(cleaned, 10);
+          if (val > 999_999_999_999) return t().vKrwMax;
+          return null;
+        },
+        formatFull(value: number): string {
+          if (lang === 'ko') return value.toLocaleString('ko-KR') + '원';
+          return '₩' + value.toLocaleString('ko-KR');
+        },
+      },
+      USD: {
+        suffix() { return '$'; },
+        defaults: { currentNetWorth: '100000.00', annualIncome: '40000.00', annualExpense: '30000.00' },
+        inputMode: 'decimal' as const,
+        parseMoney(str: string): number {
+          return parseFloat(str.replace(/,/g, '')) || 0;
+        },
+        validateMoney(str: string): string | null {
+          const cleaned = str.replace(/,/g, '');
+          if (cleaned === '') return null;
+          if (!/^\d+(\.\d{0,2})?$/.test(cleaned)) return t().vUsdDec;
+          const val = parseFloat(cleaned);
+          if (val > 999_999_999.99) return t().vUsdMax;
+          return null;
+        },
+        formatFull(value: number): string {
+          return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        },
+      },
+    };
+
+    // formatShort: y-axis tick labels — units depend on language, no currency prefix/suffix
+    function formatMoneyShort(value: number): string {
+      const abs = Math.abs(value);
+      const sign = value < 0 ? '-' : '';
+      if (lang === 'ko') {
+        if (abs >= 1_0000_0000_0000) return sign + (abs / 1_0000_0000_0000).toFixed(1) + '조';
+        if (abs >= 1_0000_0000) return sign + (abs / 1_0000_0000).toFixed(1) + '억';
+        if (abs >= 1_0000) return sign + (abs / 1_0000).toFixed(0) + '만';
+        return value.toLocaleString('ko-KR');
+      } else {
+        if (abs >= 1_000_000_000_000) return sign + (abs / 1_000_000_000_000).toFixed(1) + 'T';
+        if (abs >= 1_000_000_000) return sign + (abs / 1_000_000_000).toFixed(1) + 'B';
+        if (abs >= 1_000_000) return sign + (abs / 1_000_000).toFixed(1) + 'M';
+        if (abs >= 1_000) return sign + (abs / 1_000).toFixed(1) + 'K';
+        return sign + abs.toFixed(0);
+      }
+    }
+
+    function cfg() { return CURRENCY[currency]; }
+    function formatMoneyFull(v: number) { return cfg().formatFull(v); }
+    function parseMoney(s: string) { return cfg().parseMoney(s); }
+
+    // =========================================================================
+    // Validation
+    // =========================================================================
+    type VResult = { valid: boolean; error?: string };
+    const OK: VResult = { valid: true };
+
+    function vAge(str: string, max: number): VResult {
+      if (str === '') return { valid: false, error: t().vEnter };
+      if (!/^\d+$/.test(str)) return { valid: false, error: t().vPosInt };
+      const v = parseInt(str, 10);
+      if (v < 1 || v > max) return { valid: false, error: t().vRange(max) };
+      return OK;
+    }
+
+    function vPercent(str: string): VResult {
+      if (str === '') return { valid: false, error: t().vEnter };
+      if (!/^\d+(\.\d{0,2})?$/.test(str)) return { valid: false, error: t().vPercent };
+      const v = parseFloat(str);
+      if (v < 0 || v > 100) return { valid: false, error: t().vPercent };
+      return OK;
+    }
+
+    function vMoney(str: string): VResult {
+      const err = cfg().validateMoney(str);
+      return err ? { valid: false, error: err } : OK;
+    }
+
+    function applyError(input: HTMLInputElement, errEl: HTMLElement, r: VResult) {
+      if (r.valid) {
+        input.classList.remove('border-red-500/60');
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+      } else {
+        input.classList.add('border-red-500/60');
+        errEl.classList.remove('hidden');
+        errEl.textContent = r.error || '';
+      }
+    }
+
+    // =========================================================================
+    // Dark theme chart defaults
+    // =========================================================================
+    Chart.defaults.color = '#9ca3af';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    // =========================================================================
+    // Vertical Line Plugin (with anti-overlap labels)
+    // =========================================================================
+    const verticalLinePlugin = {
+      id: 'verticalLines',
+      afterDraw(chart: any) {
+        const lines = chart.options.plugins?.verticalLines?.lines;
+        if (!lines || lines.length === 0) return;
+        const ctx = chart.ctx;
+        const xScale = chart.scales.x;
+        const yScale = chart.scales.y;
+        const yTop = yScale.top;
+        const yBottom = yScale.bottom;
+
+        // Collect drawable lines with pixel positions
+        const items: { x: number; label: string; color: string; dash: number[]; width: number }[] = [];
+        lines.forEach((line: any) => {
+          const idx = chart.data.labels!.indexOf(line.value.toString());
+          if (idx === -1) return;
+          items.push({
+            x: xScale.getPixelForValue(idx),
+            label: line.label || '',
+            color: line.color || '#fff',
+            dash: line.dash || [6, 4],
+            width: line.width || 1.5,
+          });
+        });
+
+        // Sort by x position for overlap detection
+        items.sort((a, b) => a.x - b.x);
+
+        // Draw lines
+        items.forEach((d) => {
+          ctx.save();
+          ctx.beginPath();
+          ctx.setLineDash(d.dash);
+          ctx.strokeStyle = d.color;
+          ctx.lineWidth = d.width;
+          ctx.moveTo(d.x, yTop);
+          ctx.lineTo(d.x, yBottom);
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        // Draw labels with overlap avoidance
+        ctx.save();
+        ctx.font = '11px Pretendard, sans-serif';
+        ctx.textAlign = 'center';
+        const MIN_GAP = 100;
+        let prevX = -Infinity;
+        let prevRow = 0;
+        items.forEach((d) => {
+          if (!d.label) return;
+          let row = 0;
+          if (d.x - prevX < MIN_GAP) {
+            row = prevRow === 0 ? 1 : 0;
+          }
+          const yPos = yTop - 8 - row * 16;
+          ctx.fillStyle = d.color;
+          ctx.fillText(d.label, d.x, yPos);
+          prevX = d.x;
+          prevRow = row;
+        });
+        ctx.restore();
+      }
+    };
+    Chart.register(verticalLinePlugin);
+
+    // =========================================================================
+    // DOM References
+    // =========================================================================
+    const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+
+    const fields = {
+      currentAge: $('currentAge'),
+      retirementAge: $('retirementAge'),
+      targetAge: $('targetAge'),
+      currentNetWorth: $('currentNetWorth'),
+      cagr: $('cagr'),
+      annualIncome: $('annualIncome'),
+      incomeIncrease: $('incomeIncrease'),
+      annualExpense: $('annualExpense'),
+      expenseIncrease: $('expenseIncrease'),
+    };
+
+    const errors = {
+      currentAge: $('currentAgeError'),
+      retirementAge: $('retirementAgeError'),
+      targetAge: $('targetAgeError'),
+      currentNetWorth: $('currentNetWorthError'),
+      cagr: $('cagrError'),
+      annualIncome: $('annualIncomeError'),
+      incomeIncrease: $('incomeIncreaseError'),
+      annualExpense: $('annualExpenseError'),
+      expenseIncrease: $('expenseIncreaseError'),
+    };
+
+    const moneyFieldKeys = ['currentNetWorth', 'annualIncome', 'annualExpense'] as const;
+    const percentFieldKeys = ['cagr', 'incomeIncrease', 'expenseIncrease'] as const;
+
+    // =========================================================================
+    // Language Toggle
+    // =========================================================================
+    const btnKO = document.getElementById('btnKO')!;
+    const btnEN = document.getElementById('btnEN')!;
+    const toggleActive = 'px-2.5 py-1 text-xs font-medium rounded-md bg-primary-500/20 text-primary-400 transition-colors';
+    const toggleInactive = 'px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-300 transition-colors';
+
+    function setLang(l: Lang) {
+      lang = l;
+      btnKO.className = l === 'ko' ? toggleActive : toggleInactive;
+      btnEN.className = l === 'en' ? toggleActive : toggleInactive;
+
+      const tr = t();
+      document.title = tr.title + (lang === 'ko' ? ' | Financial Freedom Dashboard' : ' | 경제적 자유 대시보드');
+      document.getElementById('siteTitle')!.textContent = tr.title;
+
+      // Input labels
+      document.getElementById('labelCurrentAge')!.textContent = tr.currentAge;
+      document.getElementById('labelRetirementAge')!.textContent = tr.retirementAge;
+      document.getElementById('labelTargetAge')!.textContent = tr.targetAge;
+      document.getElementById('labelNetWorth')!.textContent = tr.netWorthLabel;
+      document.getElementById('labelCagr')!.textContent = tr.cagr;
+      document.getElementById('labelIncome')!.textContent = tr.income;
+      document.getElementById('labelIncomeGrowth')!.textContent = tr.incomeGrowth;
+      document.getElementById('labelExpense')!.textContent = tr.expense;
+      document.getElementById('labelExpenseGrowth')!.textContent = tr.expenseGrowth;
+
+      // Suffixes
+      document.querySelectorAll('.age-suffix').forEach((el) => { el.textContent = tr.ageSuffix; });
+      document.querySelectorAll('.money-suffix').forEach((el) => { el.textContent = cfg().suffix(); });
+
+      // Currency toggle button text
+      btnKRW.textContent = lang === 'ko' ? '₩ 원' : '₩ KRW';
+      btnUSD.textContent = '$ USD';
+
+      // Chart headers
+
+      // Chart dataset labels & axis
+      netWorthChart.data.datasets[0].label = tr.dsNetWorth;
+      netWorthChart.update();
+      incomeExpenseChart.data.datasets[0].label = tr.dsIncome;
+      incomeExpenseChart.data.datasets[1].label = tr.dsExpense;
+      (incomeExpenseChart.options.scales!.x as any).title.text = tr.xAxis;
+      incomeExpenseChart.update();
+
+      validateAndUpdate();
+    }
+
+    btnKO.addEventListener('click', () => setLang('ko'));
+    btnEN.addEventListener('click', () => setLang('en'));
+
+    // =========================================================================
+    // Currency Toggle
+    // =========================================================================
+    const btnKRW = document.getElementById('btnKRW')!;
+    const btnUSD = document.getElementById('btnUSD')!;
+
+    function setCurrency(c: Currency) {
+      currency = c;
+      btnKRW.className = c === 'KRW' ? toggleActive : toggleInactive;
+      btnUSD.className = c === 'USD' ? toggleActive : toggleInactive;
+
+      document.querySelectorAll('.money-suffix').forEach((el) => { el.textContent = cfg().suffix(); });
+
+      const defs = cfg().defaults;
+      moneyFieldKeys.forEach((key) => {
+        fields[key].setAttribute('inputmode', cfg().inputMode);
+        fields[key].value = defs[key as keyof typeof defs];
+        formatMoneyInput(fields[key]);
+      });
+
+      validateAndUpdate();
+    }
+
+    btnKRW.addEventListener('click', () => setCurrency('KRW'));
+    btnUSD.addEventListener('click', () => setCurrency('USD'));
+
+    // =========================================================================
+    // Input Listeners
+    // =========================================================================
+    function formatMoneyInput(el: HTMLInputElement) {
+      const raw = el.value;
+      const cleaned = raw.replace(/,/g, '');
+
+      let formatted: string;
+      if (currency === 'KRW') {
+        if (!/^\d*$/.test(cleaned)) { validateAndUpdate(); return; }
+        formatted = cleaned === '' ? '' : parseInt(cleaned, 10).toLocaleString('ko-KR');
+      } else {
+        const dotIdx = cleaned.indexOf('.');
+        const intPart = dotIdx >= 0 ? cleaned.slice(0, dotIdx) : cleaned;
+        const decPart = dotIdx >= 0 ? cleaned.slice(dotIdx) : '';
+        if (!/^\d*$/.test(intPart)) { validateAndUpdate(); return; }
+        const formattedInt = intPart === '' ? '' : parseInt(intPart, 10).toLocaleString('en-US');
+        formatted = formattedInt + decPart;
+      }
+
+      if (formatted !== raw) {
+        const cursorFromEnd = raw.length - (el.selectionStart || 0);
+        el.value = formatted;
+        const newPos = Math.max(0, formatted.length - cursorFromEnd);
+        el.setSelectionRange(newPos, newPos);
+      }
+      validateAndUpdate();
+    }
+
+    moneyFieldKeys.forEach((key) => {
+      fields[key].addEventListener('input', () => formatMoneyInput(fields[key]));
+    });
+
+    const nonMoneyFields = ['currentAge', 'retirementAge', 'targetAge', 'cagr', 'incomeIncrease', 'expenseIncrease'] as const;
+    nonMoneyFields.forEach((key) => {
+      fields[key].addEventListener('input', () => validateAndUpdate());
+    });
+
+    // =========================================================================
+    // Validation + Update
+    // =========================================================================
+    function validateAndUpdate() {
+      const caResult = vAge(fields.currentAge.value, 199);
+      applyError(fields.currentAge, errors.currentAge, caResult);
+
+      let raResult = vAge(fields.retirementAge.value, 199);
+      if (raResult.valid) {
+        const ca = parseInt(fields.currentAge.value, 10);
+        const ra = parseInt(fields.retirementAge.value, 10);
+        if (!isNaN(ca) && ra <= ca) {
+          raResult = { valid: false, error: t().vGtCurrent };
+        }
+      }
+      applyError(fields.retirementAge, errors.retirementAge, raResult);
+
+      let taResult = vAge(fields.targetAge.value, 200);
+      if (taResult.valid) {
+        const ra = parseInt(fields.retirementAge.value, 10);
+        const ta = parseInt(fields.targetAge.value, 10);
+        if (!isNaN(ra) && ta <= ra) {
+          taResult = { valid: false, error: t().vGtRetire };
+        }
+      }
+      applyError(fields.targetAge, errors.targetAge, taResult);
+
+      moneyFieldKeys.forEach((key) => {
+        const r = vMoney(fields[key].value);
+        applyError(fields[key], errors[key], r);
+      });
+
+      percentFieldKeys.forEach((key) => {
+        const r = vPercent(fields[key].value);
+        applyError(fields[key], errors[key], r);
+      });
+
+      update();
+    }
+
+    // =========================================================================
+    // Charts
+    // =========================================================================
+    const nwCtx = (document.getElementById('netWorthChart') as HTMLCanvasElement).getContext('2d')!;
+    const nwGradient = nwCtx.createLinearGradient(0, 0, 0, 320);
+    nwGradient.addColorStop(0, 'rgba(56, 189, 248, 0.20)');
+    nwGradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+
+    const netWorthChart = new Chart(nwCtx, {
+      type: 'line',
+      data: {
+        labels: [] as string[],
+        datasets: [{
+          label: '순자산',
+          data: [] as number[],
+          borderColor: '#38bdf8',
+          backgroundColor: nwGradient,
+          fill: true,
+          tension: 0.35,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: '#38bdf8',
+          pointHoverBorderColor: '#0f172a',
+          pointHoverBorderWidth: 2,
+          borderWidth: 2.5,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 36 } },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            borderColor: 'rgba(56, 189, 248, 0.2)',
+            borderWidth: 1,
+            titleColor: '#e2e8f0',
+            bodyColor: '#94a3b8',
+            padding: 12,
+            cornerRadius: 10,
+            displayColors: true,
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${formatMoneyFull(ctx.parsed.y)}`,
+            },
+          },
+          legend: {
+            display: true, position: 'top', align: 'start',
+            labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, color: '#94a3b8', font: { size: 12 } },
+          },
+          verticalLines: { lines: [] },
+        },
+        scales: {
+          x: { display: false, grid: { display: false } },
+          y: {
+            position: 'right',
+            ticks: { callback: (value) => formatMoneyShort(value as number), color: '#64748b', font: { size: 11 }, maxTicksLimit: 6 },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            border: { display: false },
+          },
+        },
+      },
+    });
+
+    const ieCtx = (document.getElementById('incomeExpenseChart') as HTMLCanvasElement).getContext('2d')!;
+    const incomeGradient = ieCtx.createLinearGradient(0, 0, 0, 260);
+    incomeGradient.addColorStop(0, 'rgba(52, 211, 153, 0.15)');
+    incomeGradient.addColorStop(1, 'rgba(52, 211, 153, 0.0)');
+
+    const incomeExpenseChart = new Chart(ieCtx, {
+      type: 'line',
+      data: {
+        labels: [] as string[],
+        datasets: [
+          {
+            label: '연간 수입 (세후)',
+            data: [] as number[],
+            borderColor: '#34d399',
+            backgroundColor: incomeGradient,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#34d399',
+            pointHoverBorderColor: '#0f172a',
+            pointHoverBorderWidth: 2,
+            borderWidth: 2,
+          },
+          {
+            label: '연간 지출',
+            data: [] as number[],
+            borderColor: '#f87171',
+            backgroundColor: 'transparent',
+            fill: false,
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#f87171',
+            pointHoverBorderColor: '#0f172a',
+            pointHoverBorderWidth: 2,
+            borderWidth: 2,
+            borderDash: [5, 3],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 36 } },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            borderColor: 'rgba(52, 211, 153, 0.2)',
+            borderWidth: 1,
+            titleColor: '#e2e8f0',
+            bodyColor: '#94a3b8',
+            padding: 12,
+            cornerRadius: 10,
+            displayColors: true,
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${formatMoneyFull(ctx.parsed.y)}`,
+            },
+          },
+          legend: {
+            display: true, position: 'top', align: 'start',
+            labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, color: '#94a3b8', font: { size: 12 } },
+          },
+          verticalLines: { lines: [] },
+        },
+        scales: {
+          x: {
+            title: { display: true, text: '나이 (세)', color: '#64748b', font: { size: 11 } },
+            ticks: { color: '#64748b', font: { size: 11 }, maxTicksLimit: 15 },
+            grid: { display: false },
+            border: { display: false },
+          },
+          y: {
+            position: 'right',
+            ticks: { callback: (value) => formatMoneyShort(value as number), color: '#64748b', font: { size: 11 }, maxTicksLimit: 5 },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            border: { display: false },
+          },
+        },
+      },
+    });
+
+    // =========================================================================
+    // Calculation
+    // =========================================================================
+    function update() {
+      const tr = t();
+      const currentAge = parseInt(fields.currentAge.value, 10) || 0;
+      const retirementAge = parseInt(fields.retirementAge.value, 10) || 0;
+      const targetAge = parseInt(fields.targetAge.value, 10) || 0;
+      const currentNetWorth = parseMoney(fields.currentNetWorth.value);
+      const cagr = (parseFloat(fields.cagr.value) || 0) / 100;
+      const annualIncome = parseMoney(fields.annualIncome.value);
+      const incomeIncrease = (parseFloat(fields.incomeIncrease.value) || 0) / 100;
+      const annualExpense = parseMoney(fields.annualExpense.value);
+      const expenseIncrease = (parseFloat(fields.expenseIncrease.value) || 0) / 100;
+
+      const ages: string[] = [];
+      const netWorths: number[] = [];
+      const incomes: number[] = [];
+      const expenses: number[] = [];
+
+      let nw = currentNetWorth;
+      let income = annualIncome;
+      let expense = annualExpense;
+      let brokeAge: number | null = null;
+
+      for (let age = currentAge; age <= targetAge; age++) {
+        ages.push(age.toString());
+        netWorths.push(Math.round(nw));
+        incomes.push(Math.round(age < retirementAge ? income : 0));
+        expenses.push(Math.round(expense));
+
+        if (brokeAge === null && age > currentAge && nw <= 0) {
+          brokeAge = age;
+        }
+
+        const returns = nw > 0 ? nw * cagr : 0;
+        if (age < retirementAge) {
+          nw = nw + returns + income - expense;
+        } else {
+          nw = nw + returns - expense;
+        }
+
+        income = income * (1 + incomeIncrease);
+        expense = expense * (1 + expenseIncrease);
+      }
+
+      // Financial freedom age
+      let freedomAge: number | null = null;
+      for (let startAge = currentAge; startAge <= targetAge; startAge++) {
+        const idx = startAge - currentAge;
+        if (idx >= netWorths.length) break;
+        let simNw = netWorths[idx];
+        let simExpense = annualExpense * Math.pow(1 + expenseIncrease, idx);
+        let survived = true;
+        for (let age = startAge; age < targetAge; age++) {
+          simNw = simNw + (simNw > 0 ? simNw * cagr : 0) - simExpense;
+          simExpense = simExpense * (1 + expenseIncrease);
+          if (simNw < 0) { survived = false; break; }
+        }
+        if (survived && simNw >= 0) {
+          freedomAge = startAge;
+          break;
+        }
+      }
+
+      // Build vertical lines
+      const endNetWorth = netWorths.length > 0 ? netWorths[netWorths.length - 1] : 0;
+      const freedomAchieved = endNetWorth >= 0;
+
+      const vLines: any[] = [
+        { value: retirementAge, label: tr.retireLine(retirementAge), color: '#facc15', dash: [6, 4], width: 1.5 },
+      ];
+      if (freedomAchieved && freedomAge !== null) {
+        vLines.push({ value: freedomAge, label: tr.freedomLine(freedomAge), color: '#34d399', dash: [6, 4], width: 1.5 });
+      }
+      if (!freedomAchieved && brokeAge !== null) {
+        vLines.push({ value: brokeAge, label: tr.brokeLine(brokeAge), color: '#f87171', dash: [6, 4], width: 1.5 });
+      }
+
+      // Update charts
+      netWorthChart.data.labels = ages;
+      netWorthChart.data.datasets[0].data = netWorths;
+      netWorthChart.options.plugins!.verticalLines = { lines: vLines };
+      netWorthChart.update();
+
+      incomeExpenseChart.data.labels = ages;
+      incomeExpenseChart.data.datasets[0].data = incomes;
+      incomeExpenseChart.data.datasets[1].data = expenses;
+      incomeExpenseChart.options.plugins!.verticalLines = { lines: vLines };
+      incomeExpenseChart.update();
+
+      // Summary cards
+      const retirementIdx = Math.min(Math.max(retirementAge - currentAge, 0), netWorths.length - 1);
+      document.getElementById('summaryNetWorthLabel')!.textContent = tr.retireNw(retirementAge);
+      document.getElementById('summaryNetWorth')!.textContent =
+        netWorths.length > 0 ? formatMoneyFull(netWorths[retirementIdx]) : '-';
+
+      const freedomEl = document.getElementById('summaryFreedomAge')!;
+      const freedomLabel = document.getElementById('freedomCardLabel')!;
+      const freedomBg = document.getElementById('freedomCardBg')!;
+
+      if (freedomAchieved) {
+        freedomLabel.textContent = tr.freedomOk;
+        freedomEl.textContent = freedomAge !== null ? tr.ageFmt(freedomAge) : '-';
+        freedomEl.className = 'text-2xl font-bold text-emerald-400 mt-1.5 tabular-nums';
+        freedomBg.className = 'absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent';
+      } else {
+        freedomLabel.textContent = tr.depleted;
+        freedomEl.textContent = brokeAge !== null ? tr.ageFmt(brokeAge) : '-';
+        freedomEl.className = 'text-2xl font-bold text-red-400 mt-1.5 tabular-nums';
+        freedomBg.className = 'absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent';
+      }
+
+      document.getElementById('summaryDeathAgeLabel')!.textContent = tr.targetNw(targetAge);
+      document.getElementById('summaryNetWorthEnd')!.textContent = formatMoneyFull(endNetWorth);
+    }
+
+    // Initial render
+    validateAndUpdate();
+  </script>
+</BaseLayout>
