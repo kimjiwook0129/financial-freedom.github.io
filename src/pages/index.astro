@@ -160,6 +160,7 @@ import '@/styles/global.css';
     <div class="container-custom py-6 text-center text-xs text-gray-500">
       <p>MIT License &copy; 2026 <a href="https://github.com/kimjiwook0129" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">kimjiwook0129</a></p>
       <p class="mt-1"><a href="https://github.com/kimjiwook0129/financial-freedom.github.io" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
+      <p class="mt-1" id="footerInspired">Inspired by <a href="https://mickeyhkim.github.io/c/" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">mickeyhkim.github.io/c</a></p>
     </div>
   </footer>
 
@@ -493,6 +494,10 @@ import '@/styles/global.css';
       incomeExpenseChart.data.datasets[1].label = tr.dsExpense;
       (incomeExpenseChart.options.scales!.x as any).title.text = tr.xAxis;
       incomeExpenseChart.update();
+
+      // Footer
+      const inspiredLink = '<a href="https://mickeyhkim.github.io/c/" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">mickeyhkim.github.io/c</a>';
+      document.getElementById('footerInspired')!.innerHTML = (lang === 'ko' ? '영감을 준 사이트: ' : 'Inspired by ') + inspiredLink;
 
       validateAndUpdate();
     }
