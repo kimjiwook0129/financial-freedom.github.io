@@ -839,7 +839,8 @@ import '@/styles/global.css';
       incomeExpenseChart.data.labels = ages;
       incomeExpenseChart.data.datasets[0].data = incomes;
       incomeExpenseChart.data.datasets[1].data = expenses;
-      incomeExpenseChart.options.plugins!.verticalLines = { lines: vLines };
+      const ieLines = vLines.map(l => ({ ...l, label: '' }));
+      incomeExpenseChart.options.plugins!.verticalLines = { lines: ieLines };
       incomeExpenseChart.update();
 
       // Summary cards
