@@ -123,7 +123,7 @@ import '@/styles/global.css';
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="card p-5 relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-primary-500/[0.07] dark:from-primary-500/5 to-transparent"></div>
         <div class="relative">
@@ -174,359 +174,21 @@ import '@/styles/global.css';
 
   <script>
     import Chart from 'chart.js/auto';
+    import type { Lang, CurrencyCode, VResult } from '@/lib/types';
+    import { lang, setLangState, t } from '@/lib/i18n';
+    import { formatMoneyShort } from '@/lib/formatters';
+    import { currency, setCurrencyState, CURRENCY, cfg, formatMoneyFull, parseMoney } from '@/lib/currency';
+    import { vAge, vPercent, vMoney } from '@/lib/validation';
+    import { simulate } from '@/lib/calculation';
+    import { encodeState, decodeState, FIELD_ORDER } from '@/lib/hash';
+    import { verticalLinePlugin } from '@/lib/chart-plugin';
+    import { getChartThemeColors } from '@/lib/chart-theme';
 
     // =========================================================================
-    // i18n
-    // =========================================================================
-    type Lang = 'ko' | 'en';
-    let lang: Lang = 'ko';
-
-    const T = {
-      ko: {
-        title: '경제적 자유 대시보드',
-        currentAge: '현재 나이', retirementAge: '은퇴 나이', targetAge: '목표 수명',
-        netWorthLabel: '현재 순자산', cagr: '연평균 수익률',
-        income: '연간 수입 (세후)', incomeGrowth: '연수입 증가율',
-        expense: '연간 지출', expenseGrowth: '연지출 증가율',
-        ageSuffix: '세',
-        dsNetWorth: '순자산', dsIncome: '연간 수입 (세후)', dsExpense: '연간 지출',
-        xAxis: '나이 (세)',
-        retireNw: (a: number) => `은퇴 시점 (${a}세) 순자산`,
-        freedomOk: '경제적 자유 달성',
-        depleted: '자산 소진 나이',
-        targetNw: (a: number) => `목표 수명 (${a}세) 시점 순자산`,
-        ageFmt: (a: number) => `${a}세`,
-        retireLine: (a: number) => `은퇴 (${a}세)`,
-        freedomLine: (a: number) => `자유 (${a}세)`,
-        brokeLine: (a: number) => `소진 (${a}세)`,
-        vEnter: '값을 입력하세요',
-        vPosInt: '양의 정수를 입력하세요',
-        vRange: (max: number) => `1~${max} 사이의 정수를 입력하세요`,
-        vGtCurrent: '현재 나이보다 커야 합니다',
-        vGtRetire: '은퇴 나이보다 커야 합니다',
-        vPercent: '0.00~100.00 사이의 값을 입력하세요',
-        vKrwInt: '양의 정수를 입력하세요',
-        vKrwMax: '최대 999,999,999,999까지 입력 가능합니다',
-        vUsdDec: '소수점 2자리까지의 양수를 입력하세요',
-        vUsdMax: '최대 999,999,999.99까지 입력 가능합니다',
-      },
-      en: {
-        title: 'Financial Freedom Dashboard',
-        currentAge: 'Current Age', retirementAge: 'Retirement Age', targetAge: 'Life Expectancy',
-        netWorthLabel: 'Net Worth', cagr: 'Annual Return',
-        income: 'Annual Income (After Tax)', incomeGrowth: 'Income Growth',
-        expense: 'Annual Expense', expenseGrowth: 'Expense Growth',
-        ageSuffix: 'yrs',
-        dsNetWorth: 'Net Worth', dsIncome: 'Income (After Tax)', dsExpense: 'Expense',
-        xAxis: 'Age',
-        retireNw: (a: number) => `Net Worth at Retirement (Age ${a})`,
-        freedomOk: 'Financial Freedom',
-        depleted: 'Asset Depletion Age',
-        targetNw: (a: number) => `Net Worth at Age ${a}`,
-        ageFmt: (a: number) => `Age ${a}`,
-        retireLine: (a: number) => `Retirement (${a})`,
-        freedomLine: (a: number) => `Freedom (${a})`,
-        brokeLine: (a: number) => `Depleted (${a})`,
-        vEnter: 'Enter a value',
-        vPosInt: 'Enter a positive integer',
-        vRange: (max: number) => `Enter an integer between 1 and ${max}`,
-        vGtCurrent: 'Must be greater than current age',
-        vGtRetire: 'Must be greater than retirement age',
-        vPercent: 'Enter a value between 0.00 and 100.00',
-        vKrwInt: 'Enter a positive integer',
-        vKrwMax: 'Max 999,999,999,999',
-        vUsdDec: 'Positive number, up to 2 decimal places',
-        vUsdMax: 'Max 999,999,999.99',
-      },
-    };
-
-    function t() { return T[lang]; }
-
-    // =========================================================================
-    // Currency Configuration
-    // =========================================================================
-    type Currency = 'KRW' | 'USD';
-    let currency: Currency = 'KRW';
-
-    function formatLargeKo(value: number): string {
-      const abs = Math.abs(value);
-      const sign = value < 0 ? '-' : '';
-      const units: [number, string][] = [
-        [1e68, '무량대수'], [1e64, '불가사의'], [1e60, '나유타'], [1e56, '아승기'], [1e52, '항하사'],
-        [1e48, '극'], [1e44, '재'], [1e40, '정'], [1e36, '간'], [1e32, '구'], [1e28, '양'],
-        [1e24, '자'], [1e20, '해'], [1e16, '경'], [1e12, '조'], [1e8, '억'], [1e4, '만'],
-      ];
-      for (const [threshold, unit] of units) {
-        if (abs >= threshold) return sign + (abs / threshold).toFixed(1) + ' ' + unit;
-      }
-      return value.toLocaleString('ko-KR');
-    }
-
-    function formatLargeEn(value: number, withDollar = true): string {
-      const abs = Math.abs(value);
-      const sign = value < 0 ? '-' : '';
-      const prefix = withDollar ? '$' : '';
-      const units: [number, string][] = [
-        [1e69, 'Duovigintillion'], [1e66, 'Unvigintillion'], [1e63, 'Vigintillion'],
-        [1e60, 'Novemdecillion'], [1e57, 'Octodecillion'], [1e54, 'Septendecillion'],
-        [1e51, 'Sexdecillion'], [1e48, 'Quindecillion'], [1e45, 'Quattuordecillion'],
-        [1e42, 'Tredecillion'], [1e39, 'Duodecillion'], [1e36, 'Undecillion'],
-        [1e33, 'Decillion'], [1e30, 'Nonillion'], [1e27, 'Octillion'], [1e24, 'Septillion'],
-        [1e21, 'Sextillion'], [1e18, 'Quintillion'], [1e15, 'Quadrillion'], [1e12, 'Trillion'],
-        [1e9, 'Billion'], [1e6, 'Million'],
-      ];
-      for (const [threshold, unit] of units) {
-        if (abs >= threshold) return sign + prefix + (abs / threshold).toFixed(1) + ' ' + unit;
-      }
-      return prefix + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    const CURRENCY = {
-      KRW: {
-        suffix() { return lang === 'ko' ? '원' : '₩'; },
-        defaults: { currentNetWorth: '100000000', annualIncome: '40000000', annualExpense: '30000000' },
-        inputMode: 'numeric' as const,
-        parseMoney(str: string): number {
-          return parseInt(str.replace(/,/g, ''), 10) || 0;
-        },
-        validateMoney(str: string): string | null {
-          const cleaned = str.replace(/,/g, '');
-          if (cleaned === '') return null;
-          if (!/^\d+$/.test(cleaned)) return t().vKrwInt;
-          const val = parseInt(cleaned, 10);
-          if (val > 999_999_999_999) return t().vKrwMax;
-          return null;
-        },
-        formatFull(value: number, cap = false): string {
-          if (cap && Math.abs(value) > 999_999_999_999) {
-            if (lang === 'ko') return formatLargeKo(value) + '원';
-            return '₩' + formatLargeEn(value, false);
-          }
-          if (lang === 'ko') return value.toLocaleString('ko-KR') + '원';
-          return '₩' + value.toLocaleString('ko-KR');
-        },
-      },
-      USD: {
-        suffix() { return '$'; },
-        defaults: { currentNetWorth: '100000.00', annualIncome: '40000.00', annualExpense: '30000.00' },
-        inputMode: 'decimal' as const,
-        parseMoney(str: string): number {
-          return parseFloat(str.replace(/,/g, '')) || 0;
-        },
-        validateMoney(str: string): string | null {
-          const cleaned = str.replace(/,/g, '');
-          if (cleaned === '') return null;
-          if (!/^\d+(\.\d{0,2})?$/.test(cleaned)) return t().vUsdDec;
-          const val = parseFloat(cleaned);
-          if (val > 999_999_999.99) return t().vUsdMax;
-          return null;
-        },
-        formatFull(value: number, cap = false): string {
-          if (cap && Math.abs(value) > 999_999_999_999) {
-            if (lang === 'ko') return '$' + formatLargeKo(value);
-            return formatLargeEn(value);
-          }
-          return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        },
-      },
-    };
-
-    // formatShort: y-axis tick labels — units depend on language, no currency prefix/suffix
-    function formatMoneyShort(value: number): string {
-      const abs = Math.abs(value);
-      const sign = value < 0 ? '-' : '';
-      if (lang === 'ko') {
-        // 만(10^4), 억(10^8), 조(10^12), 경(10^16), 해(10^20), 자(10^24), 양(10^28), 구(10^32), 간(10^36), 정(10^40), 재(10^44), 극(10^48), 항하사(10^52), 아승기(10^56), 나유타(10^60), 불가사의(10^64), 무량대수(10^68)
-        const koUnits: [number, string][] = [
-          [1e68, '무량대수'], [1e64, '불가사의'], [1e60, '나유타'], [1e56, '아승기'], [1e52, '항하사'],
-          [1e48, '극'], [1e44, '재'], [1e40, '정'], [1e36, '간'], [1e32, '구'], [1e28, '양'],
-          [1e24, '자'], [1e20, '해'], [1e16, '경'], [1e12, '조'], [1e8, '억'], [1e4, '만'],
-        ];
-        for (const [threshold, unit] of koUnits) {
-          if (abs >= threshold) return sign + (abs / threshold).toFixed(1) + unit;
-        }
-        return value.toLocaleString('ko-KR');
-      } else {
-        // K(10^3), M(10^6), B(10^9), T(10^12), Qd(10^15), Qn(10^18), Sx(10^21), Sp(10^24), Oc(10^27), No(10^30), Dc(10^33),
-        // UDc(10^36), DDc(10^39), TDc(10^42), QaDc(10^45), QiDc(10^48), SxDc(10^51), SpDc(10^54), OcDc(10^57), NoDc(10^60), Vg(10^63), UVg(10^66), DVg(10^69)
-        const enUnits: [number, string][] = [
-          [1e69, 'DVg'], [1e66, 'UVg'], [1e63, 'Vg'], [1e60, 'NoDc'], [1e57, 'OcDc'], [1e54, 'SpDc'],
-          [1e51, 'SxDc'], [1e48, 'QiDc'], [1e45, 'QaDc'], [1e42, 'TDc'], [1e39, 'DDc'], [1e36, 'UDc'],
-          [1e33, 'Dc'], [1e30, 'No'], [1e27, 'Oc'], [1e24, 'Sp'], [1e21, 'Sx'], [1e18, 'Qn'],
-          [1e15, 'Qd'], [1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K'],
-        ];
-        for (const [threshold, unit] of enUnits) {
-          if (abs >= threshold) return sign + (abs / threshold).toFixed(1) + unit;
-        }
-        return sign + abs.toFixed(0);
-      }
-    }
-
-    function cfg() { return CURRENCY[currency]; }
-    function formatMoneyFull(v: number, cap = false) { return cfg().formatFull(v, cap); }
-    function parseMoney(s: string) { return cfg().parseMoney(s); }
-
-    // =========================================================================
-    // Validation
-    // =========================================================================
-    type VResult = { valid: boolean; error?: string };
-    const OK: VResult = { valid: true };
-
-    function vAge(str: string, max: number): VResult {
-      if (str === '') return { valid: false, error: t().vEnter };
-      if (!/^\d+$/.test(str)) return { valid: false, error: t().vPosInt };
-      const v = parseInt(str, 10);
-      if (v < 1 || v > max) return { valid: false, error: t().vRange(max) };
-      return OK;
-    }
-
-    function vPercent(str: string): VResult {
-      if (str === '') return { valid: false, error: t().vEnter };
-      if (!/^\d+(\.\d{0,2})?$/.test(str)) return { valid: false, error: t().vPercent };
-      const v = parseFloat(str);
-      if (v < 0 || v > 100) return { valid: false, error: t().vPercent };
-      return OK;
-    }
-
-    function vMoney(str: string): VResult {
-      const err = cfg().validateMoney(str);
-      return err ? { valid: false, error: err } : OK;
-    }
-
-    function applyError(input: HTMLInputElement, errEl: HTMLElement, r: VResult) {
-      if (r.valid) {
-        input.classList.remove('border-red-500/60');
-        errEl.classList.add('hidden');
-        errEl.textContent = '';
-      } else {
-        input.classList.add('border-red-500/60');
-        errEl.classList.remove('hidden');
-        errEl.textContent = r.error || '';
-      }
-    }
-
-    // =========================================================================
-    // Dark theme chart defaults
+    // Dark theme chart defaults & plugin registration
     // =========================================================================
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
-
-    // =========================================================================
-    // Vertical Line Plugin (with anti-overlap & edge-clamped labels)
-    // =========================================================================
-    const verticalLinePlugin = {
-      id: 'verticalLines',
-      afterDraw(chart: any) {
-        const lines = chart.options.plugins?.verticalLines?.lines;
-        if (!lines || lines.length === 0) return;
-        const ctx = chart.ctx;
-        const xScale = chart.scales.x;
-        const yScale = chart.scales.y;
-        const yTop = yScale.top;
-        const yBottom = yScale.bottom;
-        const chartLeft = chart.chartArea.left;
-        const chartRight = chart.chartArea.right;
-
-        // Detect theme
-        const dark = document.documentElement.classList.contains('dark');
-
-        // Collect drawable lines with pixel positions
-        const items: { x: number; label: string; color: string; colorDark: string }[] = [];
-        lines.forEach((line: any) => {
-          const idx = chart.data.labels!.indexOf(line.value.toString());
-          if (idx === -1) return;
-          items.push({
-            x: xScale.getPixelForValue(idx),
-            label: line.label || '',
-            color: line.colorLight || line.color || '#475569',
-            colorDark: line.color || '#fff',
-          });
-        });
-
-        // Sort by x position for overlap detection
-        items.sort((a, b) => a.x - b.x);
-
-        // Draw lines — thin, subtle dashes
-        items.forEach((d) => {
-          const c = dark ? d.colorDark : d.color;
-          ctx.save();
-          ctx.beginPath();
-          ctx.setLineDash([4, 6]);
-          ctx.strokeStyle = c + '80'; // 50% opacity
-          ctx.lineWidth = 1;
-          ctx.moveTo(d.x, yTop);
-          ctx.lineTo(d.x, yBottom);
-          ctx.stroke();
-          ctx.restore();
-        });
-
-        // Draw badge-style labels with overlap avoidance & edge clamping
-        ctx.save();
-        const fontSize = 10;
-        ctx.font = `500 ${fontSize}px Pretendard, sans-serif`;
-        const padH = 6;
-        const padV = 3;
-        const badgeH = fontSize + padV * 2;
-        const MIN_GAP = 100;
-        let prevX = -Infinity;
-        let prevRow = 0;
-        items.forEach((d) => {
-          if (!d.label) return;
-
-          // Row assignment for anti-overlap
-          let row = 0;
-          if (d.x - prevX < MIN_GAP) {
-            row = prevRow === 0 ? 1 : 0;
-          }
-          const yPos = yTop - 6 - row * (badgeH + 4);
-
-          // Measure text and clamp horizontally (avoid legend area at top-left)
-          const textW = ctx.measureText(d.label).width;
-          const totalW = textW + padH * 2;
-          const legendBox = chart.legend?.legendHitBoxes?.[0];
-          const legendRight = legendBox ? legendBox.left + legendBox.width + 12 : chartLeft;
-          const minLeft = Math.max(chartLeft, legendRight);
-          let labelX = d.x;
-          if (labelX - totalW / 2 < minLeft) labelX = minLeft + totalW / 2;
-          if (labelX + totalW / 2 > chartRight) labelX = chartRight - totalW / 2;
-
-          // Draw badge background
-          const c = dark ? d.colorDark : d.color;
-          const rx = labelX - totalW / 2;
-          const ry = yPos - badgeH;
-          const radius = 4;
-          ctx.fillStyle = c + (dark ? '1A' : '20'); // background opacity
-          ctx.beginPath();
-          ctx.roundRect(rx, ry, totalW, badgeH, radius);
-          ctx.fill();
-          ctx.strokeStyle = c + (dark ? '40' : '50'); // border opacity
-          ctx.lineWidth = 0.5;
-          ctx.setLineDash([]);
-          ctx.stroke();
-
-          // Draw text
-          ctx.fillStyle = c;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(d.label, labelX, ry + badgeH / 2);
-
-          // Draw connector line from badge to vertical line
-          if (Math.abs(labelX - d.x) > 2) {
-            ctx.beginPath();
-            ctx.strokeStyle = c + '40';
-            ctx.lineWidth = 0.5;
-            ctx.setLineDash([2, 2]);
-            ctx.moveTo(d.x, yTop);
-            ctx.lineTo(labelX, ry + badgeH);
-            ctx.stroke();
-          }
-
-          prevX = d.x;
-          prevRow = row;
-        });
-        ctx.restore();
-      }
-    };
     Chart.register(verticalLinePlugin);
 
     // =========================================================================
@@ -562,6 +224,21 @@ import '@/styles/global.css';
     const percentFieldKeys = ['cagr', 'incomeIncrease', 'expenseIncrease'] as const;
 
     // =========================================================================
+    // Validation helpers (DOM-coupled)
+    // =========================================================================
+    function applyError(input: HTMLInputElement, errEl: HTMLElement, r: VResult) {
+      if (r.valid) {
+        input.classList.remove('border-red-500/60');
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+      } else {
+        input.classList.add('border-red-500/60');
+        errEl.classList.remove('hidden');
+        errEl.textContent = r.error || '';
+      }
+    }
+
+    // =========================================================================
     // Language Toggle
     // =========================================================================
     const btnKO = document.getElementById('btnKO')!;
@@ -570,7 +247,7 @@ import '@/styles/global.css';
     const toggleInactive = 'px-2.5 py-1 text-xs font-medium rounded-md text-slate-500 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 transition-colors';
 
     function setLang(l: Lang) {
-      lang = l;
+      setLangState(l);
       btnKO.className = l === 'ko' ? toggleActive : toggleInactive;
       btnEN.className = l === 'en' ? toggleActive : toggleInactive;
 
@@ -597,8 +274,6 @@ import '@/styles/global.css';
       // Currency toggle button text
       document.getElementById('btnKRWLabel')!.innerHTML = lang === 'ko' ? '₩<span class="hidden md:inline"> 원</span>' : '₩<span class="hidden md:inline"> KRW</span>';
       document.getElementById('btnUSDLabel')!.innerHTML = '$<span class="hidden md:inline"> USD</span>';
-
-      // Chart headers
 
       // Chart dataset labels & axis
       netWorthChart.data.datasets[0].label = tr.dsNetWorth;
@@ -628,9 +303,9 @@ import '@/styles/global.css';
     const btnKRW = document.getElementById('btnKRW')!;
     const btnUSD = document.getElementById('btnUSD')!;
 
-    function setCurrency(c: Currency) {
+    function setCurrency(c: CurrencyCode) {
       const prevCurrency = currency;
-      currency = c;
+      setCurrencyState(c);
       btnKRW.className = c === 'KRW' ? toggleActive : toggleInactive;
       btnUSD.className = c === 'USD' ? toggleActive : toggleInactive;
 
@@ -894,28 +569,21 @@ import '@/styles/global.css';
     const btnTheme = document.getElementById('btnTheme')!;
 
     function applyThemeToCharts() {
-      const textColor = isDark ? '#64748b' : '#94a3b8';
-      const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(100,116,139,0.1)';
-      const legendColor = isDark ? '#94a3b8' : '#475569';
-      const tooltipBg = isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(30, 41, 59, 0.9)';
-      const tooltipTitle = isDark ? '#e2e8f0' : '#f1f5f9';
-      const tooltipBody = isDark ? '#94a3b8' : '#cbd5e1';
-      const tooltipBorder = isDark ? 'rgba(56, 189, 248, 0.2)' : 'rgba(56, 189, 248, 0.3)';
-      const hoverBorder = isDark ? '#0f172a' : '#f1f5f9';
+      const colors = getChartThemeColors(isDark);
 
       [netWorthChart, incomeExpenseChart].forEach((chart) => {
         const opts = chart.options as any;
-        opts.plugins.tooltip.backgroundColor = tooltipBg;
-        opts.plugins.tooltip.titleColor = tooltipTitle;
-        opts.plugins.tooltip.bodyColor = tooltipBody;
-        opts.plugins.tooltip.borderColor = tooltipBorder;
-        opts.plugins.legend.labels.color = legendColor;
-        if (opts.scales.x.title) opts.scales.x.title.color = textColor;
-        if (opts.scales.x.ticks) opts.scales.x.ticks.color = textColor;
-        opts.scales.y.ticks.color = textColor;
-        opts.scales.y.grid.color = gridColor;
+        opts.plugins.tooltip.backgroundColor = colors.tooltipBg;
+        opts.plugins.tooltip.titleColor = colors.tooltipTitle;
+        opts.plugins.tooltip.bodyColor = colors.tooltipBody;
+        opts.plugins.tooltip.borderColor = colors.tooltipBorder;
+        opts.plugins.legend.labels.color = colors.legendColor;
+        if (opts.scales.x.title) opts.scales.x.title.color = colors.textColor;
+        if (opts.scales.x.ticks) opts.scales.x.ticks.color = colors.textColor;
+        opts.scales.y.ticks.color = colors.textColor;
+        opts.scales.y.grid.color = colors.gridColor;
         chart.data.datasets.forEach((ds: any) => {
-          ds.pointHoverBorderColor = hoverBorder;
+          ds.pointHoverBorderColor = colors.hoverBorder;
         });
         chart.update();
       });
@@ -933,70 +601,22 @@ import '@/styles/global.css';
     // =========================================================================
     function update() {
       const tr = t();
-      const currentAge = parseInt(fields.currentAge.value, 10) || 0;
+      const result = simulate({
+        currentAge: parseInt(fields.currentAge.value, 10) || 0,
+        retirementAge: parseInt(fields.retirementAge.value, 10) || 0,
+        targetAge: parseInt(fields.targetAge.value, 10) || 0,
+        currentNetWorth: parseMoney(fields.currentNetWorth.value),
+        cagr: (parseFloat(fields.cagr.value) || 0) / 100,
+        annualIncome: parseMoney(fields.annualIncome.value),
+        incomeIncrease: (parseFloat(fields.incomeIncrease.value) || 0) / 100,
+        annualExpense: parseMoney(fields.annualExpense.value),
+        expenseIncrease: (parseFloat(fields.expenseIncrease.value) || 0) / 100,
+      });
+
       const retirementAge = parseInt(fields.retirementAge.value, 10) || 0;
-      const targetAge = parseInt(fields.targetAge.value, 10) || 0;
-      const currentNetWorth = parseMoney(fields.currentNetWorth.value);
-      const cagr = (parseFloat(fields.cagr.value) || 0) / 100;
-      const annualIncome = parseMoney(fields.annualIncome.value);
-      const incomeIncrease = (parseFloat(fields.incomeIncrease.value) || 0) / 100;
-      const annualExpense = parseMoney(fields.annualExpense.value);
-      const expenseIncrease = (parseFloat(fields.expenseIncrease.value) || 0) / 100;
-
-      const ages: string[] = [];
-      const netWorths: number[] = [];
-      const incomes: number[] = [];
-      const expenses: number[] = [];
-
-      let nw = currentNetWorth;
-      let income = annualIncome;
-      let expense = annualExpense;
-      let brokeAge: number | null = null;
-
-      for (let age = currentAge; age <= targetAge; age++) {
-        ages.push(age.toString());
-        netWorths.push(Math.round(nw));
-        incomes.push(Math.round(age < retirementAge ? income : 0));
-        expenses.push(Math.round(expense));
-
-        if (brokeAge === null && age > currentAge && nw <= 0) {
-          brokeAge = age;
-        }
-
-        const returns = nw > 0 ? nw * cagr : 0;
-        if (age < retirementAge) {
-          nw = nw + returns + income - expense;
-        } else {
-          nw = nw + returns - expense;
-        }
-
-        income = income * (1 + incomeIncrease);
-        expense = expense * (1 + expenseIncrease);
-      }
-
-      // Financial freedom age
-      let freedomAge: number | null = null;
-      for (let startAge = currentAge; startAge <= targetAge; startAge++) {
-        const idx = startAge - currentAge;
-        if (idx >= netWorths.length) break;
-        let simNw = netWorths[idx];
-        let simExpense = annualExpense * Math.pow(1 + expenseIncrease, idx);
-        let survived = true;
-        for (let age = startAge; age < targetAge; age++) {
-          simNw = simNw + (simNw > 0 ? simNw * cagr : 0) - simExpense;
-          simExpense = simExpense * (1 + expenseIncrease);
-          if (simNw < 0) { survived = false; break; }
-        }
-        if (survived && simNw >= 0) {
-          freedomAge = startAge;
-          break;
-        }
-      }
+      const { ages, netWorths, incomes, expenses, brokeAge, freedomAge, endNetWorth, freedomAchieved, retirementIdx } = result;
 
       // Build vertical lines
-      const endNetWorth = netWorths.length > 0 ? netWorths[netWorths.length - 1] : 0;
-      const freedomAchieved = endNetWorth >= 0;
-
       const vLines: any[] = [
         { value: retirementAge, label: tr.retireLine(retirementAge), color: '#facc15', colorLight: '#a16207' },
       ];
@@ -1021,7 +641,6 @@ import '@/styles/global.css';
       incomeExpenseChart.update();
 
       // Summary cards
-      const retirementIdx = Math.min(Math.max(retirementAge - currentAge, 0), netWorths.length - 1);
       document.getElementById('summaryNetWorthLabel')!.textContent = tr.retireNw(retirementAge);
       document.getElementById('summaryNetWorth')!.textContent =
         netWorths.length > 0 ? formatMoneyFull(netWorths[retirementIdx], true) : '-';
@@ -1042,62 +661,37 @@ import '@/styles/global.css';
         freedomBg.className = 'absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent';
       }
 
-      document.getElementById('summaryDeathAgeLabel')!.textContent = tr.targetNw(targetAge);
+      document.getElementById('summaryDeathAgeLabel')!.textContent = tr.targetNw(parseInt(fields.targetAge.value, 10) || 0);
       document.getElementById('summaryNetWorthEnd')!.textContent = formatMoneyFull(endNetWorth, true);
     }
 
     // =========================================================================
     // Share: encode/decode state via URL hash (compact base64)
     // =========================================================================
-    // Format: version 1 = "1|lang|cur|ca|ra|ta|nw|cagr|ai|ig|ae|eg"
-    // Pipe-delimited, base64url-encoded. New fields append at end (backward compat).
-    const FIELD_ORDER: (keyof typeof fields)[] = [
-      'currentAge', 'retirementAge', 'targetAge',
-      'currentNetWorth', 'cagr',
-      'annualIncome', 'incomeIncrease',
-      'annualExpense', 'expenseIncrease',
-    ];
-
-    function toBase64Url(s: string): string {
-      return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    }
-    function fromBase64Url(s: string): string {
-      let b = s.replace(/-/g, '+').replace(/_/g, '/');
-      while (b.length % 4) b += '=';
-      return atob(b);
-    }
-
     function encodeHash(): string {
-      const parts = ['1', lang, currency];
+      const fieldValues: Record<string, string> = {};
       for (const key of FIELD_ORDER) {
-        parts.push(fields[key].value.replace(/,/g, ''));
+        fieldValues[key] = fields[key as keyof typeof fields].value;
       }
-      return '#' + toBase64Url(parts.join('|'));
+      return encodeState(lang, currency, fieldValues);
     }
 
     function loadFromHash(): boolean {
       const hash = window.location.hash.slice(1);
-      if (!hash) return false;
-      try {
-        const decoded = fromBase64Url(hash);
-        const parts = decoded.split('|');
-        if (parts[0] !== '1') return false; // unknown version
-        const hashLang = parts[1];
-        const hashCur = parts[2];
-        if (hashLang === 'ko' || hashLang === 'en') setLang(hashLang);
-        if (hashCur === 'KRW' || hashCur === 'USD') setCurrency(hashCur);
-        // Fields — only set if present in the hash (backward compat: new fields may not exist)
-        for (let i = 0; i < FIELD_ORDER.length; i++) {
-          const val = parts[3 + i];
-          if (val !== undefined && val !== '') {
-            const key = FIELD_ORDER[i];
-            fields[key].value = val;
-            if (moneyFieldKeys.includes(key as any)) formatMoneyInput(fields[key]);
-          }
+      const state = decodeState(hash);
+      if (!state) return false;
+
+      if (state.lang === 'ko' || state.lang === 'en') setLang(state.lang as Lang);
+      if (state.currency === 'KRW' || state.currency === 'USD') setCurrency(state.currency as CurrencyCode);
+
+      for (const key of FIELD_ORDER) {
+        if (state.fields[key]) {
+          fields[key as keyof typeof fields].value = state.fields[key];
+          if (moneyFieldKeys.includes(key as any)) formatMoneyInput(fields[key as keyof typeof fields]);
         }
-        validateAndUpdate();
-        return true;
-      } catch { return false; }
+      }
+      validateAndUpdate();
+      return true;
     }
 
     // Share button
