@@ -1,0 +1,66 @@
+import type { Lang } from './types';
+
+export let lang: Lang = 'ko';
+export function setLangState(l: Lang) { lang = l; }
+
+const T = {
+  ko: {
+    title: '경제적 자유 대시보드',
+    currentAge: '현재 나이', retirementAge: '은퇴 나이', targetAge: '목표 수명',
+    netWorthLabel: '현재 순자산', cagr: '연평균 수익률',
+    income: '연간 수입 (세후)', incomeGrowth: '연수입 증가율',
+    expense: '연간 지출', expenseGrowth: '연지출 증가율',
+    ageSuffix: '세',
+    dsNetWorth: '순자산', dsIncome: '연간 수입 (세후)', dsExpense: '연간 지출',
+    xAxis: '나이 (세)',
+    retireNw: (a: number) => `은퇴 시점 (${a}세) 순자산`,
+    freedomOk: '경제적 자유 달성',
+    depleted: '자산 소진 나이',
+    targetNw: (a: number) => `목표 수명 (${a}세) 시점 순자산`,
+    ageFmt: (a: number) => `${a}세`,
+    retireLine: (a: number) => `은퇴 (${a}세)`,
+    freedomLine: (a: number) => `자유 (${a}세)`,
+    brokeLine: (a: number) => `소진 (${a}세)`,
+    vEnter: '값을 입력하세요',
+    vPosInt: '양의 정수를 입력하세요',
+    vRange: (max: number) => `1~${max} 사이의 정수를 입력하세요`,
+    vGtCurrent: '현재 나이보다 커야 합니다',
+    vGtRetire: '은퇴 나이보다 커야 합니다',
+    vPercent: '0.00~100.00 사이의 값을 입력하세요',
+    vKrwInt: '양의 정수를 입력하세요',
+    vKrwMax: '최대 999,999,999,999까지 입력 가능합니다',
+    vUsdDec: '소수점 2자리까지의 양수를 입력하세요',
+    vUsdMax: '최대 999,999,999.99까지 입력 가능합니다',
+  },
+  en: {
+    title: 'Financial Freedom Dashboard',
+    currentAge: 'Current Age', retirementAge: 'Retirement Age', targetAge: 'Life Expectancy',
+    netWorthLabel: 'Net Worth', cagr: 'Annual Return',
+    income: 'Annual Income (After Tax)', incomeGrowth: 'Income Growth',
+    expense: 'Annual Expense', expenseGrowth: 'Expense Growth',
+    ageSuffix: 'yrs',
+    dsNetWorth: 'Net Worth', dsIncome: 'Income (After Tax)', dsExpense: 'Expense',
+    xAxis: 'Age',
+    retireNw: (a: number) => `Net Worth at Retirement (Age ${a})`,
+    freedomOk: 'Financial Freedom',
+    depleted: 'Asset Depletion Age',
+    targetNw: (a: number) => `Net Worth at Age ${a}`,
+    ageFmt: (a: number) => `Age ${a}`,
+    retireLine: (a: number) => `Retirement (${a})`,
+    freedomLine: (a: number) => `Freedom (${a})`,
+    brokeLine: (a: number) => `Depleted (${a})`,
+    vEnter: 'Enter a value',
+    vPosInt: 'Enter a positive integer',
+    vRange: (max: number) => `Enter an integer between 1 and ${max}`,
+    vGtCurrent: 'Must be greater than current age',
+    vGtRetire: 'Must be greater than retirement age',
+    vPercent: 'Enter a value between 0.00 and 100.00',
+    vKrwInt: 'Enter a positive integer',
+    vKrwMax: 'Max 999,999,999,999',
+    vUsdDec: 'Positive number, up to 2 decimal places',
+    vUsdMax: 'Max 999,999,999.99',
+  },
+};
+
+export type Translations = typeof T['ko'];
+export function t(): Translations { return T[lang]; }
