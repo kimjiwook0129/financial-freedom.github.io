@@ -197,7 +197,7 @@ import '@/styles/global.css';
       id: 'pressTooltip',
       beforeEvent(chart: any, args: any) {
         const evt = args.event;
-        if (evt.type === 'mousemove' && !chart._pressing) {
+        if ((evt.type === 'mousemove' || evt.type === 'touchmove') && !chart._pressing) {
           return false;
         }
       },
@@ -205,6 +205,7 @@ import '@/styles/global.css';
         chart._pressing = false;
         const canvas = chart.canvas;
         canvas.addEventListener('mousedown', () => { chart._pressing = true; });
+        canvas.addEventListener('touchstart', () => { chart._pressing = true; });
         canvas.addEventListener('mouseup', () => {
           chart._pressing = false;
           chart.tooltip?.setActiveElements([], { x: 0, y: 0 });
