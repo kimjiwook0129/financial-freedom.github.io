@@ -31,6 +31,7 @@ const T = {
     vKrwMax: '최대 999,999,999,999까지 입력 가능합니다',
     vUsdDec: '소수점 2자리까지의 양수를 입력하세요',
     vUsdMax: '최대 999,999,999.99까지 입력 가능합니다',
+    chartHint: '차트를 클릭하고 드래그하면 해당 값을 확인할 수 있습니다',
   },
   en: {
     title: 'Financial Freedom Dashboard',
@@ -59,6 +60,7 @@ const T = {
     vKrwMax: 'Max 999,999,999,999',
     vUsdDec: 'Positive number, up to 2 decimal places',
     vUsdMax: 'Max 999,999,999.99',
+    chartHint: 'Click and drag on the chart to see values',
   },
 };
 
