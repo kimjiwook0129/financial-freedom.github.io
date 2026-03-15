@@ -149,6 +149,7 @@ import '@/styles/global.css';
 
     <!-- Charts -->
     <div class="card p-6 space-y-0">
+      <p id="chartHint" class="text-xs text-slate-400 dark:text-gray-500 mb-2">차트를 클릭하면 해당 값을 확인할 수 있습니다</p>
       <div>
         <div class="relative w-full" style="height: 320px;">
           <canvas id="netWorthChart"></canvas>
@@ -190,6 +191,38 @@ import '@/styles/global.css';
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
     Chart.register(verticalLinePlugin);
+
+    // Plugin: tooltip only shows while pressing/dragging (not on hover)
+    const pressTooltipPlugin = {
+      id: 'pressTooltip',
+      beforeEvent(chart: any, args: any) {
+        const evt = args.event;
+        if (evt.type === 'mousemove' && !chart._pressing) {
+          return false;
+        }
+      },
+      afterInit(chart: any) {
+        chart._pressing = false;
+        const canvas = chart.canvas;
+        canvas.addEventListener('mousedown', () => { chart._pressing = true; });
+        canvas.addEventListener('mouseup', () => {
+          chart._pressing = false;
+          chart.tooltip?.setActiveElements([], { x: 0, y: 0 });
+          chart.setActiveElements([]);
+          chart.update('none');
+        });
+        canvas.addEventListener('mouseleave', () => {
+          chart._pressing = false;
+        });
+        canvas.addEventListener('touchend', () => {
+          chart._pressing = false;
+          chart.tooltip?.setActiveElements([], { x: 0, y: 0 });
+          chart.setActiveElements([]);
+          chart.update('none');
+        });
+      },
+    };
+    Chart.register(pressTooltipPlugin);
 
     // =========================================================================
     // DOM References
@@ -274,6 +307,9 @@ import '@/styles/global.css';
       // Currency toggle button text
       document.getElementById('btnKRWLabel')!.innerHTML = lang === 'ko' ? '₩<span class="hidden md:inline"> 원</span>' : '₩<span class="hidden md:inline"> KRW</span>';
       document.getElementById('btnUSDLabel')!.innerHTML = '$<span class="hidden md:inline"> USD</span>';
+
+      // Chart hint
+      document.getElementById('chartHint')!.textContent = tr.chartHint;
 
       // Chart dataset labels & axis
       netWorthChart.data.datasets[0].label = tr.dsNetWorth;
@@ -423,6 +459,8 @@ import '@/styles/global.css';
     nwGradient.addColorStop(0, 'rgba(56, 189, 248, 0.20)');
     nwGradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
 
+    const chartEvents = ['mousemove', 'mouseout', 'touchstart', 'touchmove'] as const;
+
     const netWorthChart = new Chart(nwCtx, {
       type: 'line',
       data: {
@@ -446,6 +484,7 @@ import '@/styles/global.css';
         responsive: true,
         maintainAspectRatio: false,
         layout: { padding: { top: 36 } },
+        events: chartEvents as unknown as (keyof HTMLElementEventMap)[],
         interaction: { mode: 'index', intersect: false },
         plugins: {
           tooltip: {
@@ -457,8 +496,11 @@ import '@/styles/global.css';
             padding: 12,
             cornerRadius: 10,
             displayColors: true,
+            usePointStyle: true,
+            boxWidth: 6,
+            boxHeight: 6,
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${formatMoneyFull(ctx.parsed.y)}`,
+              label: (ctx) => ` ${formatMoneyFull(ctx.parsed.y)}`,
             },
           },
           legend: {
@@ -524,6 +566,7 @@ import '@/styles/global.css';
         responsive: true,
         maintainAspectRatio: false,
         layout: { padding: { top: 36 } },
+        events: chartEvents as unknown as (keyof HTMLElementEventMap)[],
         interaction: { mode: 'index', intersect: false },
         plugins: {
           tooltip: {
@@ -535,8 +578,11 @@ import '@/styles/global.css';
             padding: 12,
             cornerRadius: 10,
             displayColors: true,
+            usePointStyle: true,
+            boxWidth: 6,
+            boxHeight: 6,
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${formatMoneyFull(ctx.parsed.y)}`,
+              label: (ctx) => ` ${formatMoneyFull(ctx.parsed.y)}`,
             },
           },
           legend: {
