@@ -13,7 +13,7 @@ A single-page financial freedom dashboard that projects your net worth over time
 - KRW/USD currency toggle with automatic value conversion (÷1000 / ×1000)
 - Korean/English language toggle
 - Dark/light theme toggle
-- Shareable dashboard via compact URL encoding
+- Save & share dashboard via cloud-backed short URLs (auto-expires after 72h of inactivity)
 - Responsive design with condensed navbar on mobile/tablet
 - Comma-formatted money inputs with real-time validation
 
@@ -22,6 +22,8 @@ A single-page financial freedom dashboard that projects your net worth over time
 - [Astro](https://astro.build/) v5 — static site framework
 - [Tailwind CSS](https://tailwindcss.com/) v3 — styling
 - [Chart.js](https://www.chartjs.org/) v4 — interactive charts
+- [Cloudflare Workers](https://workers.cloudflare.com/) — API proxy for state persistence
+- [Upstash Redis](https://upstash.com/) — serverless key-value store
 - [Pretendard](https://github.com/orioncactus/pretendard) — Korean web font
 
 ## Getting Started

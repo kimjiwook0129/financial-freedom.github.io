@@ -13,7 +13,7 @@
 - 원화/달러 통화 전환 (자동 환산: ÷1000 / ×1000)
 - 한국어/영어 언어 전환
 - 다크/라이트 테마 전환
-- URL을 통한 대시보드 공유 기능
+- 클라우드 기반 짧은 URL로 대시보드 저장 및 공유 (72시간 미사용 시 자동 삭제)
 - 모바일/태블릿 반응형 디자인
 - 실시간 입력 검증 및 천 단위 콤마 포맷
 
@@ -22,6 +22,8 @@
 - [Astro](https://astro.build/) v5 — 정적 사이트 프레임워크
 - [Tailwind CSS](https://tailwindcss.com/) v3 — 스타일링
 - [Chart.js](https://www.chartjs.org/) v4 — 인터랙티브 차트
+- [Cloudflare Workers](https://workers.cloudflare.com/) — 상태 저장용 API 프록시
+- [Upstash Redis](https://upstash.com/) — 서버리스 키-값 저장소
 - [Pretendard](https://github.com/orioncactus/pretendard) — 한국어 웹 폰트
 
 ## 시작하기
