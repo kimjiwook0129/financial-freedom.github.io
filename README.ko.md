@@ -28,19 +28,7 @@
 
 ## 시작하기
 
-```bash
-# 의존성 설치
-npm install
-
-# 개발 서버 실행
-npm run dev
-
-# 프로덕션 빌드
-npm run build
-
-# 프로덕션 빌드 미리보기
-npm run preview
-```
+전체 설정 가이드 (사전 요구사항, 시크릿, 로컬 개발)는 [SETUP.ko.md](SETUP.ko.md)를 참고하세요.
 
 ## 감사의 말
 

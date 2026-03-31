@@ -28,19 +28,7 @@ A single-page financial freedom dashboard that projects your net worth over time
 
 ## Getting Started
 
-```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-```
+See [SETUP.md](SETUP.md) for full setup instructions (prerequisites, secrets, local development).
 
 ## Acknowledgements
 
