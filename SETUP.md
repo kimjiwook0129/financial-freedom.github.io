@@ -6,11 +6,8 @@
 
 - **Node.js** 20+
 - **npm**
-- **ejson** — `brew install ejson`
-- **jq** — `brew install jq`
-- **wrangler** (installed automatically via `npm install` in `worker/`)
-
-You will also need the **ejson private key** from a team member to decrypt secrets.
+- A free [Upstash](https://upstash.com/) account (for Redis)
+- A free [Cloudflare](https://cloudflare.com/) account (for Workers)
 
 ## 1. Clone and Install
 
@@ -25,33 +22,27 @@ npm install
 cd worker && npm install && cd ..
 ```
 
-## 2. Set Up ejson Private Key
+## 2. Create Upstash Redis Database
 
-Get the private key from a team member. The public key is `4f7160f09230a06b6731427d41e0b0fbb56b2433d3bf7a673cd57824e5ff5179`.
-
-```bash
-sudo mkdir -p /opt/ejson/keys
-sudo sh -c 'echo "PRIVATE_KEY_HERE" > /opt/ejson/keys/4f7160f09230a06b6731427d41e0b0fbb56b2433d3bf7a673cd57824e5ff5179'
-```
-
-Verify it works:
-
-```bash
-./decrypt_ejson.sh
-# Should output: [OK] .env.ejson → .env
-```
+1. Go to [console.upstash.com/redis](https://console.upstash.com/redis)
+2. Click **Create Database**
+3. Pick a name (e.g. `financial-freedom-redis`) and region
+4. After creation, copy the **UPSTASH_REDIS_REST_URL** and **UPSTASH_REDIS_REST_TOKEN**
 
 ## 3. Configure Local Environment
-
-After decrypting, create the local dev files:
 
 ```bash
 # Create .env.development for the dashboard dev server
 echo 'PUBLIC_API_URL=http://localhost:8787' > .env.development
 
-# Create .dev.vars for the worker dev server (copy values from .env)
-cp .env worker/.dev.vars
+# Create .dev.vars for the worker dev server
+cat > worker/.dev.vars << 'EOF'
+UPSTASH_REDIS_REST_URL=https://your-database.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token-here
+EOF
 ```
+
+Replace the values with your actual Upstash credentials.
 
 ## 4. Run Locally
 
@@ -81,22 +72,20 @@ Push to `main` triggers automatic deployment to GitHub Pages via GitHub Actions.
 ```bash
 cd worker
 npx wrangler login    # One-time Cloudflare auth
-npm run deploy        # Deploy to production
-```
 
-Upstash secrets are already configured as Cloudflare secrets. If they need to be updated:
+# Set Upstash secrets (one-time)
+echo "https://your-database.upstash.io" | npx wrangler secret put UPSTASH_REDIS_REST_URL
+echo "your-token-here" | npx wrangler secret put UPSTASH_REDIS_REST_TOKEN
 
-```bash
-cd worker
-echo "NEW_VALUE" | npx wrangler secret put UPSTASH_REDIS_REST_URL
-echo "NEW_VALUE" | npx wrangler secret put UPSTASH_REDIS_REST_TOKEN
+# Deploy
+npm run deploy
 ```
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---|---|
-| `./decrypt_ejson.sh` fails | Ensure the private key is at `/opt/ejson/keys/<public_key>` |
 | Share/Save buttons fail locally | Ensure the worker is running (`localhost:8787`) and `.env.development` exists |
 | CORS errors locally | Make sure you started the worker with `--env dev` |
 | `wrangler deploy` fails | Run `npx wrangler login` first |
+| Worker returns 500 | Check that Upstash secrets are set via `npx wrangler secret list` |

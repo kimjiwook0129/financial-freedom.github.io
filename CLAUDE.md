@@ -52,10 +52,7 @@ worker/
   wrangler.toml          # Worker config (name, CORS origins, env-specific vars)
   package.json           # Worker dependencies (wrangler)
   .dev.vars              # Local-only Upstash secrets for wrangler dev (gitignored)
-.env.ejson               # Encrypted Upstash credentials (ejson, safe to commit)
 .env.development         # Local dev override: PUBLIC_API_URL=http://localhost:8787 (gitignored)
-decrypt_ejson.sh         # Decrypt .env.ejson → .env
-encrypt_ejson.sh         # Encrypt .env.ejson in place
 .github/workflows/
   deploy.yml             # GitHub Pages deployment (Node 20, npm ci, build)
 astro.config.mjs         # Site URL, base path, Tailwind integration
@@ -148,13 +145,9 @@ Deploy from `worker/` directory via `npm run deploy` (requires `wrangler login`)
 ### Local Development
 
 To run both dashboard and worker locally:
-1. Ensure `worker/.dev.vars` has Upstash credentials (run `./decrypt_ejson.sh` and copy values)
-2. Ensure `.env.development` has `PUBLIC_API_URL=http://localhost:8787`
+1. Create `worker/.dev.vars` with your Upstash credentials (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`)
+2. Create `.env.development` with `PUBLIC_API_URL=http://localhost:8787`
 3. Start worker: `cd worker && npm run dev -- --env dev`
 4. Start dashboard: `npm run dev` (from project root)
 
-### Secrets Management (ejson)
-
-Upstash credentials are encrypted in `.env.ejson` using [ejson](https://github.com/Shopify/ejson). The private key must be stored at `/opt/ejson/keys/<public_key>`.
-- `./encrypt_ejson.sh` — encrypt after editing `.env.ejson`
-- `./decrypt_ejson.sh` — decrypt to `.env`
+See [SETUP.md](SETUP.md) for full first-time setup instructions.
