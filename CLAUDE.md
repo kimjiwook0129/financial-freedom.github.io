@@ -49,8 +49,13 @@ public/
   favicon.svg            # Emoji favicon (💰)
 worker/
   src/index.ts           # Cloudflare Worker: POST/GET/PUT /state → Upstash Redis
-  wrangler.toml          # Worker config (name, CORS origins)
+  wrangler.toml          # Worker config (name, CORS origins, env-specific vars)
   package.json           # Worker dependencies (wrangler)
+  .dev.vars              # Local-only Upstash secrets for wrangler dev (gitignored)
+.env.ejson               # Encrypted Upstash credentials (ejson, safe to commit)
+.env.development         # Local dev override: PUBLIC_API_URL=http://localhost:8787 (gitignored)
+decrypt_ejson.sh         # Decrypt .env.ejson → .env
+encrypt_ejson.sh         # Encrypt .env.ejson in place
 .github/workflows/
   deploy.yml             # GitHub Pages deployment (Node 20, npm ci, build)
 astro.config.mjs         # Site URL, base path, Tailwind integration
@@ -126,8 +131,8 @@ npm run build    # Production build to dist/
 npm run preview  # Preview production build locally
 
 # Worker (from worker/)
-npm run dev      # Local worker dev server (localhost:8787)
-npm run deploy   # Deploy worker to Cloudflare
+npm run dev -- --env dev   # Local worker dev server (localhost:8787, allows localhost CORS)
+npm run deploy             # Deploy worker to Cloudflare production
 ```
 
 ## Deployment
@@ -139,3 +144,17 @@ Push to `main` triggers `.github/workflows/deploy.yml` which builds and deploys 
 Deploy from `worker/` directory via `npm run deploy` (requires `wrangler login`). Upstash credentials are stored as Cloudflare secrets (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`), not in code.
 
 **Worker URL:** `https://financial-freedom-api.financial-freedom.workers.dev`
+
+### Local Development
+
+To run both dashboard and worker locally:
+1. Ensure `worker/.dev.vars` has Upstash credentials (run `./decrypt_ejson.sh` and copy values)
+2. Ensure `.env.development` has `PUBLIC_API_URL=http://localhost:8787`
+3. Start worker: `cd worker && npm run dev -- --env dev`
+4. Start dashboard: `npm run dev` (from project root)
+
+### Secrets Management (ejson)
+
+Upstash credentials are encrypted in `.env.ejson` using [ejson](https://github.com/Shopify/ejson). The private key must be stored at `/opt/ejson/keys/<public_key>`.
+- `./encrypt_ejson.sh` — encrypt after editing `.env.ejson`
+- `./decrypt_ejson.sh` — decrypt to `.env`
