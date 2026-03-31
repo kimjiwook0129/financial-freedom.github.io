@@ -777,7 +777,6 @@ import '@/styles/global.css';
         labelShort.textContent = lang === 'ko' ? '저장 중...' : 'Saving...';
         labelFull.textContent = lang === 'ko' ? '새 링크 생성 중...' : 'Creating new link...';
         const id = await createState(buildPayload());
-        currentStateId = id;
         const url = window.location.origin + window.location.pathname + '#' + id;
         await navigator.clipboard.writeText(url);
         labelShort.textContent = lang === 'ko' ? '복사됨' : 'Copied';
