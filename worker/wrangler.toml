@@ -1,0 +1,9 @@
+name = "financial-freedom-api"
+main = "src/index.ts"
+compatibility_date = "2025-03-31"
+
+[vars]
+ALLOWED_ORIGINS = "https://kimjiwook0129.github.io"
+
+[env.dev.vars]
+ALLOWED_ORIGINS = "https://kimjiwook0129.github.io,http://localhost:4321"

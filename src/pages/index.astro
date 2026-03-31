@@ -9,10 +9,20 @@ import '@/styles/global.css';
     <div class="container-custom py-4 flex items-center justify-between">
       <h1 id="siteTitle" class="text-base font-bold tracking-widest text-slate-800 dark:text-gray-100"><span id="siteTitleShort" class="md:hidden">경.자.대</span><span class="hidden md:inline" id="siteTitleFull">경제적 자유 대시보드</span></h1>
       <div class="flex items-center gap-2">
+        <!-- Save Button -->
+        <div class="relative group">
+          <button id="btnSave" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-200/80 dark:bg-gray-800/60 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors">
+            💾 <span id="saveLabelShort" class="inline md:hidden">저장</span><span id="saveLabelFull" class="hidden md:inline">대시보드 저장하기</span>
+          </button>
+          <span id="saveTooltip" class="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1.5 w-max max-w-[200px] text-center px-2 py-1 text-[10px] leading-tight rounded bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity z-50">72시간 동안 저장/공유하지 않으면 대시보드가 삭제됩니다.</span>
+        </div>
         <!-- Share Button -->
-        <button id="btnShare" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-200/80 dark:bg-gray-800/60 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors" title="Share">
-          🔗 <span id="shareLabelShort" class="inline md:hidden">공유</span><span id="shareLabelFull" class="hidden md:inline">대시보드 공유하기</span>
-        </button>
+        <div class="relative group">
+          <button id="btnShare" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-200/80 dark:bg-gray-800/60 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors">
+            🔗 <span id="shareLabelShort" class="inline md:hidden">공유</span><span id="shareLabelFull" class="hidden md:inline">대시보드 공유하기</span>
+          </button>
+          <span id="shareTooltip" class="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1.5 w-max max-w-[200px] text-center px-2 py-1 text-[10px] leading-tight rounded bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity z-50">72시간 동안 저장/공유하지 않으면 대시보드가 삭제됩니다.</span>
+        </div>
         <!-- Theme Toggle -->
         <button id="btnTheme" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-200/80 dark:bg-gray-800/60 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors" title="Toggle theme">
           🌙
@@ -181,7 +191,8 @@ import '@/styles/global.css';
     import { currency, setCurrencyState, CURRENCY, cfg, formatMoneyFull, parseMoney } from '@/lib/currency';
     import { vAge, vPercent, vMoney } from '@/lib/validation';
     import { simulate } from '@/lib/calculation';
-    import { encodeState, decodeState, FIELD_ORDER } from '@/lib/hash';
+    import { FIELD_ORDER } from '@/lib/hash';
+    import { createState, getState, updateState, type StatePayload } from '@/lib/api';
     import { verticalLinePlugin } from '@/lib/chart-plugin';
     import { getChartThemeColors } from '@/lib/chart-theme';
 
@@ -324,9 +335,14 @@ import '@/styles/global.css';
       const inspiredLink = '<a href="https://mickeyhkim.github.io/c/" class="text-gray-400 hover:text-gray-300 underline underline-offset-2" target="_blank" rel="noopener noreferrer">mickeyhkim.github.io/c</a>';
       document.getElementById('footerInspired')!.innerHTML = (lang === 'ko' ? '영감을 준 사이트: ' : 'Inspired by ') + inspiredLink;
 
-      // Share button label
+      // Share & Save button labels
       document.getElementById('shareLabelShort')!.textContent = lang === 'ko' ? '공유' : 'Share';
       document.getElementById('shareLabelFull')!.textContent = lang === 'ko' ? '대시보드 공유하기' : 'Share Your Dashboard';
+      document.getElementById('saveLabelShort')!.textContent = lang === 'ko' ? '저장' : 'Save';
+      document.getElementById('saveLabelFull')!.textContent = lang === 'ko' ? '대시보드 저장하기' : 'Save Your Dashboard';
+      const ttlTooltip = lang === 'ko' ? '72시간 동안 저장/공유하지 않으면 대시보드가 삭제됩니다.' : 'Dashboard will be deleted if not saved/shared for 72 hours.';
+      document.getElementById('saveTooltip')!.textContent = ttlTooltip;
+      document.getElementById('shareTooltip')!.textContent = ttlTooltip;
 
       validateAndUpdate();
     }
@@ -713,24 +729,21 @@ import '@/styles/global.css';
     }
 
     // =========================================================================
-    // Share: encode/decode state via URL hash (compact base64)
+    // Share & Save: persist state via API, use short hash key in URL
     // =========================================================================
-    function encodeHash(): string {
+    let currentStateId: string | null = null;
+
+    function buildPayload(): StatePayload {
       const fieldValues: Record<string, string> = {};
       for (const key of FIELD_ORDER) {
-        fieldValues[key] = fields[key as keyof typeof fields].value;
+        fieldValues[key] = (fields[key as keyof typeof fields].value || '').replace(/,/g, '');
       }
-      return encodeState(lang, currency, fieldValues);
+      return { lang, currency, fields: fieldValues };
     }
 
-    function loadFromHash(): boolean {
-      const hash = window.location.hash.slice(1);
-      const state = decodeState(hash);
-      if (!state) return false;
-
+    function applyState(state: StatePayload): void {
       if (state.lang === 'ko' || state.lang === 'en') setLang(state.lang as Lang);
       if (state.currency === 'KRW' || state.currency === 'USD') setCurrency(state.currency as CurrencyCode);
-
       for (const key of FIELD_ORDER) {
         if (state.fields[key]) {
           fields[key as keyof typeof fields].value = state.fields[key];
@@ -738,23 +751,68 @@ import '@/styles/global.css';
         }
       }
       validateAndUpdate();
-      return true;
     }
 
-    // Share button
-    document.getElementById('btnShare')!.addEventListener('click', async () => {
-      const url = window.location.origin + window.location.pathname + encodeHash();
+    async function loadFromHash(): Promise<boolean> {
+      const id = window.location.hash.slice(1);
+      if (!id) return false;
       try {
+        const state = await getState(id);
+        if (!state) return false;
+        currentStateId = id;
+        applyState(state);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    // Share button — always creates a new entry (POST)
+    document.getElementById('btnShare')!.addEventListener('click', async () => {
+      const labelShort = document.getElementById('shareLabelShort')!;
+      const labelFull = document.getElementById('shareLabelFull')!;
+      const origShort = labelShort.textContent;
+      const origFull = labelFull.textContent;
+      try {
+        labelShort.textContent = lang === 'ko' ? '저장 중...' : 'Saving...';
+        labelFull.textContent = lang === 'ko' ? '새 링크 생성 중...' : 'Creating new link...';
+        const id = await createState(buildPayload());
+        const url = window.location.origin + window.location.pathname + '#' + id;
         await navigator.clipboard.writeText(url);
-        const labelShort = document.getElementById('shareLabelShort')!;
-        const labelFull = document.getElementById('shareLabelFull')!;
-        const origShort = labelShort.textContent;
-        const origFull = labelFull.textContent;
         labelShort.textContent = lang === 'ko' ? '복사됨' : 'Copied';
-        labelFull.textContent = lang === 'ko' ? '대시보드 주소가 복사되었습니다!' : 'Dashboard URL copied!';
+        labelFull.textContent = lang === 'ko' ? '새 링크가 복사되었습니다!' : 'New link copied!';
         setTimeout(() => { labelShort.textContent = origShort; labelFull.textContent = origFull; }, 1500);
       } catch {
-        prompt(lang === 'ko' ? 'URL을 복사하세요:' : 'Copy this URL:', url);
+        labelShort.textContent = origShort;
+        labelFull.textContent = origFull;
+        prompt(lang === 'ko' ? '링크 생성에 실패했습니다.' : 'Failed to create link.');
+      }
+    });
+
+    // Save button — POST if new, PUT if existing. Updates URL to match.
+    document.getElementById('btnSave')!.addEventListener('click', async () => {
+      const labelShort = document.getElementById('saveLabelShort')!;
+      const labelFull = document.getElementById('saveLabelFull')!;
+      const origShort = labelShort.textContent;
+      const origFull = labelFull.textContent;
+      try {
+        labelShort.textContent = lang === 'ko' ? '저장 중...' : 'Saving...';
+        labelFull.textContent = lang === 'ko' ? '대시보드를 저장하는 중...' : 'Saving dashboard...';
+        if (currentStateId) {
+          await updateState(currentStateId, buildPayload());
+        } else {
+          currentStateId = await createState(buildPayload());
+        }
+        window.history.replaceState(null, '', '#' + currentStateId);
+        const url = window.location.origin + window.location.pathname + '#' + currentStateId;
+        await navigator.clipboard.writeText(url);
+        labelShort.textContent = lang === 'ko' ? '저장됨' : 'Saved';
+        labelFull.textContent = lang === 'ko' ? '저장 완료! URL이 복사되었습니다.' : 'Saved! URL copied.';
+        setTimeout(() => { labelShort.textContent = origShort; labelFull.textContent = origFull; }, 1500);
+      } catch {
+        labelShort.textContent = origShort;
+        labelFull.textContent = origFull;
+        prompt(lang === 'ko' ? '저장에 실패했습니다.' : 'Failed to save.');
       }
     });
 
